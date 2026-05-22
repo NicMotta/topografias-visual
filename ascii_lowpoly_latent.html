@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ASCII Low Poly Latent</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        background: #06070a;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+          "Liberation Mono", monospace;
+      }
+
+      #panel {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        z-index: 10;
+        width: 360px;
+        color: #fff;
+        background: rgba(0, 0, 0, 0.72);
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        border-radius: 12px;
+        padding: 12px;
+        backdrop-filter: blur(6px);
+      }
+
+      #panel button {
+        margin-top: 8px;
+        border: 0;
+        border-radius: 8px;
+        padding: 8px 10px;
+        background: #f39c42;
+        color: #111;
+        cursor: pointer;
+        font-weight: 700;
+      }
+
+      #panel button:hover {
+        background: #ffb55f;
+      }
+
+      #preview {
+        width: 100%;
+        margin-top: 8px;
+        border-radius: 8px;
+        display: block;
+        background: #111;
+      }
+
+      #meta {
+        margin-top: 8px;
+        font-size: 12px;
+        line-height: 1.35;
+        word-break: break-word;
+      }
+
+      #canvas {
+        display: block;
+      }
+
+      .hint {
+        opacity: 0.9;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="panel">
+      <strong>ASCII Low Poly</strong><br />
+      Imagen convertida en mosaico alfanumérico con sensación low-poly.
+      <div class="hint">- letras más densas = sombras</div>
+      <div class="hint">- colores tomados de la imagen original</div>
+      <button id="randomBtn">Otra imagen / otra pieza</button>
+      <img id="preview" alt="preview" />
+      <div id="meta">Cargando...</div>
+    </div>
+
+    <canvas id="canvas"></canvas>
+
+    <script>
+      const canvas = document.getElementById("canvas");
+      const ctx = canvas.getContext("2d");
+
+      const randomBtn = document.getElementById("randomBtn");
+      const preview = document.getElementById("preview");
+      const meta = document.getElementById("meta");
+
+      let W = 0;
+      let H = 0;
+      let current = null;
+      let imageData = null;
+      let chars = [];
+      let grid = null;
+      let animSeed = Math.random() * 1000;
+
+      const charset = "@%#*+=-:. 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+      resize();
+      window.addEventListener("resize", resize);
+      randomBtn.addEventListener("click", loadRandomArt);
+
+      loadRandomArt();
+      requestAnimationFrame(loop);
+
+      function resize() {
+        W = window.innerWidth;
+        H = window.innerHeight;
+        canvas.width = W;
+        canvas.height = H;
+        if (imageData) rebuildLayout();
+      }
+
+      async function loadRandomArt() {
+        try {
+          const res = await fetch("./latents.json");
+          const data = await res.json();
+          const items = data.items || [];
+          if (!items.length) return;
+
+          current = items[Math.floor(Math.random() * items.length)];
+          const imagePath = `./imagenes_generadas/${current.file}`;
+          preview.src = imagePath;
+
+          imageData = await readPixels(imagePath);
+          rebuildLayout();
+          animSeed = Math.random() * 1000;
+
+          meta.innerHTML = `
+            <strong>${current.file}</strong><br>
+            modo: ASCII + low poly<br>
+            grid: ${grid.cols} x ${grid.rows}<br>
+            coord_1d: ${Number(current.coord_1d).toFixed(4)}
+          `;
+        } catch (e) {
+          console.error(e);
+          meta.textContent = "Error cargando la pieza ASCII.";
+        }
+      }
+
+      function readPixels(src) {
+        return new Promise((resolve, reject) => {
+          const img = new Image();
+          img.crossOrigin = "anonymous";
+          img.onload = () => {
+            const cv = document.createElement("canvas");
+            cv.width = img.naturalWidth;
+            cv.height = img.naturalHeight;
+            const ictx = cv.getContext("2d", { willReadFrequently: true });
+            ictx.drawImage(img, 0, 0);
+            resolve(ictx.getImageData(0, 0, cv.width, cv.height));
+          };
+          img.onerror = reject;
+          img.src = src;
+        });
+      }
+
+      function rebuildLayout() {
+        if (!imageData) return;
+        const imgW = imageData.width;
+        const imgH = imageData.height;
+        const aspect = imgW / imgH;
+
+        const cols = Math.max(46, Math.floor((W / 15) * 1.15));
+        const rows = Math.max(28, Math.floor(cols / aspect));
+
+        const cellW = W / cols;
+        const cellH = H / rows;
+
+        grid = {
+          cols,
+          rows,
+          cellW,
+          cellH,
+          imgW,
+          imgH,
+        };
+
+        chars = new Array(cols * rows).fill(null).map((_, idx) => {
+          const x = idx % cols;
+          const y = Math.floor(idx / cols);
+          const { lum, r, g, b } = sampleAtGrid(x, y);
+          const char = pickChar(lum);
+
+          return {
+            x,
+            y,
+            lum,
+            r,
+            g,
+            b,
+            char,
+            z: (1 - lum) * 24,
+            phase: Math.random() * Math.PI * 2,
+          };
+        });
+      }
+
+      function sampleAtGrid(gx, gy) {
+        const u = gx / Math.max(grid?.cols - 1 || 1, 1);
+        const v = gy / Math.max(grid?.rows - 1 || 1, 1);
+        const ix = Math.min(imageData.width - 1, Math.floor(u * (imageData.width - 1)));
+        const iy = Math.min(imageData.height - 1, Math.floor(v * (imageData.height - 1)));
+        const i = (iy * imageData.width + ix) * 4;
+
+        const r = imageData.data[i];
+        const g = imageData.data[i + 1];
+        const b = imageData.data[i + 2];
+        const lum = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
+        return { lum, r, g, b };
+      }
+
+      function pickChar(lum) {
+        const idx = Math.max(
+          0,
+          Math.min(charset.length - 1, Math.floor((1 - lum) * (charset.length - 1))),
+        );
+        return charset[idx];
+      }
+
+      function loop(ts) {
+        const t = ts * 0.001;
+
+        ctx.fillStyle = "#06070a";
+        ctx.fillRect(0, 0, W, H);
+
+        if (grid && chars.length) {
+          drawLowPolyAscii(t);
+        }
+
+        requestAnimationFrame(loop);
+      }
+
+      function drawLowPolyAscii(t) {
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.font = `${Math.max(11, Math.floor(grid.cellW * 0.86))}px ui-monospace, monospace`;
+
+        const wave = 0.5 + 0.5 * Math.sin(t * 0.8 + animSeed);
+
+        // fondo low-poly con triángulos
+        for (let y = 0; y < grid.rows - 1; y++) {
+          for (let x = 0; x < grid.cols - 1; x++) {
+            const a = getCell(x, y);
+            const b = getCell(x + 1, y);
+            const c = getCell(x, y + 1);
+            const d = getCell(x + 1, y + 1);
+
+            const x0 = x * grid.cellW;
+            const y0 = y * grid.cellH;
+            const x1 = (x + 1) * grid.cellW;
+            const y1 = (y + 1) * grid.cellH;
+
+            const liftA = Math.sin(t * 1.3 + a.phase) * 2.5 + a.z * 0.12;
+            const liftB = Math.sin(t * 1.2 + b.phase) * 2.5 + b.z * 0.12;
+            const liftC = Math.sin(t * 1.1 + c.phase) * 2.5 + c.z * 0.12;
+            const liftD = Math.sin(t * 1.15 + d.phase) * 2.5 + d.z * 0.12;
+
+            // tri 1
+            ctx.beginPath();
+            ctx.moveTo(x0, y0 - liftA);
+            ctx.lineTo(x1, y0 - liftB);
+            ctx.lineTo(x0, y1 - liftC);
+            ctx.closePath();
+            ctx.fillStyle = triColor(a, b, c, wave);
+            ctx.fill();
+
+            // tri 2
+            ctx.beginPath();
+            ctx.moveTo(x1, y0 - liftB);
+            ctx.lineTo(x1, y1 - liftD);
+            ctx.lineTo(x0, y1 - liftC);
+            ctx.closePath();
+            ctx.fillStyle = triColor(b, d, c, 1 - wave);
+            ctx.fill();
+          }
+        }
+
+        // overlay ASCII
+        for (const cell of chars) {
+          const px = cell.x * grid.cellW + grid.cellW / 2;
+          const py = cell.y * grid.cellH + grid.cellH / 2 - Math.sin(t * 0.9 + cell.phase) * (1 + (1 - cell.lum) * 2.2);
+
+          const alpha = 0.15 + (1 - cell.lum) * 0.85;
+          const glow = 80 + Math.floor((1 - cell.lum) * 120);
+
+          ctx.fillStyle = `rgba(${glow}, ${Math.floor(cell.g * 0.65)}, ${Math.floor(cell.b * 0.95)}, ${alpha})`;
+          ctx.fillText(cell.char, px, py);
+        }
+
+        // grano sutil
+        ctx.globalAlpha = 0.08;
+        ctx.fillStyle = "#ffffff";
+        for (let i = 0; i < 120; i++) {
+          const x = (Math.sin(i * 999 + t * 12) * 0.5 + 0.5) * W;
+          const y = (Math.cos(i * 777 + t * 10) * 0.5 + 0.5) * H;
+          ctx.fillRect(x, y, 1, 1);
+        }
+        ctx.globalAlpha = 1;
+      }
+
+      function triColor(a, b, c, mix) {
+        const r = Math.floor((a.r + b.r + c.r) / 3);
+        const g = Math.floor((a.g + b.g + c.g) / 3);
+        const b2 = Math.floor((a.b + b.b + c.b) / 3);
+        const lum = (a.lum + b.lum + c.lum) / 3;
+        const boost = 0.4 + mix * 0.45;
+        return `rgba(${Math.floor(r * boost)}, ${Math.floor(g * boost)}, ${Math.floor(b2 * boost)}, ${0.18 + lum * 0.28})`;
+      }
+
+      function getCell(x, y) {
+        return chars[y * grid.cols + x];
+      }
+    </script>
+  </body>
+</html>
