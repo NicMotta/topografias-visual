@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Catálogo | Visualizador</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        background: radial-gradient(
+          circle at top,
+          #1b2238 0%,
+          #0f1220 45%,
+          #0a0c12 100%
+        );
+        font-family: Arial, sans-serif;
+        color: #fff;
+      }
+
+      .wrap {
+        max-width: 920px;
+        margin: 0 auto;
+        padding: 28px 18px 42px;
+      }
+
+      h1 {
+        margin: 0 0 8px;
+        font-size: 30px;
+      }
+
+      .lead {
+        margin: 0 0 18px;
+        opacity: 0.92;
+      }
+
+      .stats {
+        margin: 0 0 18px;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 12px;
+        padding: 10px 12px;
+        font-size: 14px;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 14px;
+      }
+
+      .card {
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        border-radius: 14px;
+        padding: 14px;
+      }
+
+      .card h2 {
+        margin: 0 0 8px;
+        font-size: 18px;
+      }
+
+      .card p {
+        margin: 0 0 10px;
+        font-size: 14px;
+        opacity: 0.92;
+      }
+
+      .actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .btn {
+        display: inline-block;
+        text-decoration: none;
+        color: #fff;
+        background: #2f7cff;
+        border: 1px solid #4e90ff;
+        border-radius: 10px;
+        padding: 8px 11px;
+        font-size: 14px;
+      }
+
+      .btn:hover {
+        background: #4b8dff;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <h1>Catálogo de visualizaciones</h1>
+      <p class="lead">Este index funciona como portada del proyecto.</p>
+
+      <div class="stats" id="stats">Cargando métricas...</div>
+
+      <div class="grid">
+        <article class="card">
+          <h2>Visualizador 3D de latents</h2>
+          <p>
+            Nube de puntos + líneas de conexión. Click en un punto para ver la
+            preview de la imagen y sus coordenadas.
+          </p>
+          <div class="actions">
+            <a class="btn" href="./visualizador_3d.html">Abrir</a>
+          </div>
+        </article>
+
+        <article class="card">
+          <h2>Mapa 3D por color</h2>
+          <p>
+            Elige una imagen aleatoria y genera una malla 3D con altura según
+            luminancia de píxeles.
+          </p>
+          <div class="actions">
+            <a class="btn" href="./mapa_color_3d.html">Abrir</a>
+          </div>
+        </article>
+
+        <article class="card">
+          <h2>Terreno 3D + ríos</h2>
+          <p>
+            Mezcla el terreno por color con flujos dinámicos por encima,
+            simulando ríos guiados por pendiente y latent.
+          </p>
+          <div class="actions">
+            <a class="btn" href="./terreno_rios_3d.html">Abrir</a>
+          </div>
+        </article>
+
+        <article class="card">
+          <h2>Convivencia 3D (todo en una escena)</h2>
+          <p>
+            Integra la nube de puntos y el mapa de color en una sola
+            visualización. Al seleccionar un punto se actualiza el mapa.
+          </p>
+          <div class="actions">
+            <a class="btn" href="./convivencia_3d.html">Abrir</a>
+          </div>
+        </article>
+
+        <article class="card">
+          <h2>Imagen + Latents</h2>
+          <p>
+            Incluye timeline por coord_1d y explorador de vecinos cercanos en
+            coord_3d con miniaturas interactivas.
+          </p>
+          <div class="actions">
+            <a class="btn" href="./dos_opciones_latents.html"
+              >Abrir opciones extra</a
+            >
+          </div>
+        </article>
+
+        <article class="card">
+          <h2>Visualización en movimiento</h2>
+          <p>
+            Nube de partículas cromática animada a partir de una imagen
+            aleatoria del dataset.
+          </p>
+          <div class="actions">
+            <a class="btn" href="./arte_flujo_latent.html">Abrir</a>
+          </div>
+        </article>
+
+        <article class="card">
+          <h2>Flujo de constelaciones</h2>
+          <p>
+            Trazos de partículas guiadas por luminancia de imagen y parámetros
+            de latents, con estética de nebula en movimiento.
+          </p>
+          <div class="actions">
+            <a class="btn" href="./arte_kaleidoscopio_latent.html">Abrir</a>
+          </div>
+        </article>
+      </div>
+    </div>
+
+    <script type="module">
+      async function loadStats() {
+        const statsEl = document.getElementById("stats");
+
+        try {
+          const [latentsRes, modelRes] = await Promise.all([
+            fetch("./latents.json"),
+            fetch("./latents.json"),
+          ]);
+
+          if (!latentsRes.ok || !modelRes.ok) throw new Error("fetch failed");
+
+          const latents = await latentsRes.json();
+          const model = await modelRes.json();
+
+          const total = latents.items?.length ?? 0;
+          const modelName = model.model_name ?? "-";
+          const latentDim = model.latent_dim ?? "-";
+
+          statsEl.innerHTML =
+            `<strong>Dataset:</strong> ${modelName} · ` +
+            `<strong>Imágenes:</strong> ${total} · ` +
+            `<strong>Latent dim:</strong> ${latentDim}`;
+        } catch {
+          statsEl.textContent =
+            "No se pudieron cargar las métricas del catálogo.";
+        }
+      }
+
+      loadStats();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mapa 3D por color</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        background: #0e0e0e;
+        font-family: Arial, sans-serif;
+      }
+
+      #hud {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        z-index: 10;
+        color: #fff;
+        background: rgba(0, 0, 0, 0.72);
+        padding: 12px;
+        border-radius: 10px;
+        max-width: 340px;
+        font-size: 13px;
+        line-height: 1.35;
+      }
+
+      #hud button {
+        margin-top: 8px;
+        border: 0;
+        border-radius: 8px;
+        padding: 8px 10px;
+        background: #2f7cff;
+        color: #fff;
+        cursor: pointer;
+      }
+
+      #hud button:hover {
+        background: #4b8dff;
+      }
+
+      #preview {
+        width: 100%;
+        margin-top: 8px;
+        border-radius: 8px;
+        display: block;
+        background: #1e1e1e;
+        object-fit: contain;
+      }
+
+      #meta {
+        margin-top: 8px;
+        word-break: break-word;
+      }
+
+      canvas {
+        display: block;
+      }
+    </style>
+
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+          "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <div id="hud">
+      <strong>Mapa 3D desde color</strong><br />
+      - Toma una imagen aleatoria de <em>imagenes_generadas</em><br />
+      - Usa la luminancia del pixel para altura<br />
+      - Color original del pixel en la malla
+
+      <button id="randomBtn">Elegir otra imagen aleatoria</button>
+
+      <img id="preview" alt="Preview de imagen seleccionada" />
+      <div id="meta">Cargando...</div>
+    </div>
+
+    <script type="module">
+      import * as THREE from "three";
+      import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+
+      let scene, camera, renderer, controls;
+      let currentMesh = null;
+
+      const preview = document.getElementById("preview");
+      const meta = document.getElementById("meta");
+      const randomBtn = document.getElementById("randomBtn");
+
+      init();
+      buildRandomMap();
+
+      randomBtn.addEventListener("click", buildRandomMap);
+
+      function init() {
+        scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x0e0e0e);
+
+        camera = new THREE.PerspectiveCamera(
+          60,
+          window.innerWidth / window.innerHeight,
+          0.1,
+          5000,
+        );
+        camera.position.set(0, 110, 180);
+
+        renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.target.set(0, 0, 0);
+
+        scene.add(new THREE.AmbientLight(0xffffff, 0.9));
+
+        const keyLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        keyLight.position.set(90, 160, 120);
+        scene.add(keyLight);
+
+        scene.add(new THREE.AxesHelper(35));
+
+        window.addEventListener("resize", onResize);
+        animate();
+      }
+
+      async function buildRandomMap() {
+        try {
+          meta.textContent = "Cargando datos...";
+
+          const response = await fetch("./latents.json");
+          const data = await response.json();
+          const items = data.items || [];
+
+          if (!items.length) {
+            meta.textContent = "No hay items en latents.json";
+            return;
+          }
+
+          const item = items[Math.floor(Math.random() * items.length)];
+          const imagePath = `./imagenes_generadas/${item.file}`;
+
+          const imageData = await readImagePixels(imagePath);
+          const mesh = createHeightMeshFromImage(imageData);
+
+          if (currentMesh) {
+            scene.remove(currentMesh);
+            currentMesh.geometry.dispose();
+            currentMesh.material.dispose();
+          }
+
+          currentMesh = mesh;
+          scene.add(currentMesh);
+
+          preview.src = imagePath;
+
+          meta.innerHTML = `
+            <strong>${item.file}</strong><br>
+            resolución: ${imageData.width} x ${imageData.height}<br>
+            muestras usadas: ${mesh.userData.sampleW} x ${mesh.userData.sampleH}<br>
+            escala altura: ${mesh.userData.heightScale}
+          `;
+        } catch (error) {
+          console.error(error);
+          meta.textContent = "Error al generar el mapa 3D";
+        }
+      }
+
+      function readImagePixels(src) {
+        return new Promise((resolve, reject) => {
+          const img = new Image();
+          img.crossOrigin = "anonymous";
+
+          img.onload = () => {
+            const canvas = document.createElement("canvas");
+            canvas.width = img.naturalWidth;
+            canvas.height = img.naturalHeight;
+            const ctx = canvas.getContext("2d", { willReadFrequently: true });
+            ctx.drawImage(img, 0, 0);
+
+            const imageData = ctx.getImageData(
+              0,
+              0,
+              canvas.width,
+              canvas.height,
+            );
+            resolve(imageData);
+          };
+
+          img.onerror = reject;
+          img.src = src;
+        });
+      }
+
+      function createHeightMeshFromImage(imageData) {
+        const srcW = imageData.width;
+        const srcH = imageData.height;
+        const data = imageData.data;
+
+        // Bajamos resolución para rendimiento visual razonable
+        const targetW = 120;
+        const targetH = Math.max(40, Math.round((srcH / srcW) * targetW));
+
+        const geometry = new THREE.PlaneGeometry(
+          140,
+          (140 * srcH) / srcW,
+          targetW - 1,
+          targetH - 1,
+        );
+        geometry.rotateX(-Math.PI / 2);
+
+        const positions = geometry.attributes.position;
+        const colors = new Float32Array(targetW * targetH * 3);
+
+        const heightScale = 42;
+
+        for (let y = 0; y < targetH; y++) {
+          for (let x = 0; x < targetW; x++) {
+            const u = x / (targetW - 1);
+            const v = y / (targetH - 1);
+
+            const ix = Math.min(srcW - 1, Math.floor(u * (srcW - 1)));
+            const iy = Math.min(srcH - 1, Math.floor(v * (srcH - 1)));
+            const idx = (iy * srcW + ix) * 4;
+
+            const r = data[idx] / 255;
+            const g = data[idx + 1] / 255;
+            const b = data[idx + 2] / 255;
+
+            // Luminancia perceptual (Rec. 709)
+            const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+            const h = luminance * heightScale;
+
+            const vertexIndex = y * targetW + x;
+            positions.setY(vertexIndex, h);
+
+            colors[vertexIndex * 3] = r;
+            colors[vertexIndex * 3 + 1] = g;
+            colors[vertexIndex * 3 + 2] = b;
+          }
+        }
+
+        geometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
+        geometry.computeVertexNormals();
+
+        const material = new THREE.MeshStandardMaterial({
+          vertexColors: true,
+          roughness: 0.85,
+          metalness: 0.06,
+          side: THREE.DoubleSide,
+          flatShading: false,
+        });
+
+        const mesh = new THREE.Mesh(geometry, material);
+        mesh.position.y = -18;
+
+        mesh.userData = {
+          sampleW: targetW,
+          sampleH: targetH,
+          heightScale,
+        };
+
+        return mesh;
+      }
+
+      function onResize() {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      }
+
+      function animate() {
+        requestAnimationFrame(animate);
+        controls.update();
+        renderer.render(scene, camera);
+      }
+    </script>
+  </body>
+</html>
