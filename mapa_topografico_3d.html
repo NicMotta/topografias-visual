@@ -1,0 +1,441 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mapa Topográfico 3D</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        background: #0d1118;
+        font-family: Arial, sans-serif;
+      }
+
+      #hud {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        z-index: 10;
+        color: #fff;
+        background: rgba(0, 0, 0, 0.74);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 10px;
+        padding: 12px;
+        width: 360px;
+        font-size: 13px;
+        line-height: 1.35;
+      }
+
+      #hud button {
+        margin-top: 8px;
+        border: 0;
+        border-radius: 8px;
+        padding: 8px 10px;
+        background: #2f7cff;
+        color: #fff;
+        cursor: pointer;
+      }
+
+      #hud button:hover {
+        background: #4b8dff;
+      }
+
+      .control {
+        margin-top: 10px;
+      }
+
+      .control label {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 4px;
+        font-size: 12px;
+      }
+
+      .control input[type="range"] {
+        width: 100%;
+      }
+
+      #preview {
+        width: 100%;
+        margin-top: 8px;
+        border-radius: 8px;
+        display: block;
+        background: #1c1f26;
+      }
+
+      #meta {
+        margin-top: 8px;
+        word-break: break-word;
+      }
+
+      canvas {
+        display: block;
+      }
+    </style>
+
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+          "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <div id="hud">
+      <strong>Topográfico 3D</strong><br />
+      - Terreno por luminancia<br />
+      - Curvas de nivel (equidistancia)
+
+      <button id="randomBtn">Elegir otra imagen</button>
+
+      <div class="control">
+        <label>
+          <span>Exageración vertical</span>
+          <span id="heightScaleValue">48</span>
+        </label>
+        <input id="heightScale" type="range" min="12" max="90" step="1" value="48" />
+      </div>
+
+      <div class="control">
+        <label>
+          <span>Equidistancia curvas</span>
+          <span id="contourStepValue">2.4</span>
+        </label>
+        <input id="contourStep" type="range" min="0.8" max="6" step="0.1" value="2.4" />
+      </div>
+
+      <img id="preview" alt="preview" />
+      <div id="meta">Cargando...</div>
+    </div>
+
+    <script type="module">
+      import * as THREE from "three";
+      import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+
+      let scene, camera, renderer, controls;
+      let terrainMesh = null;
+      let contourLines = null;
+      let lastImageData = null;
+      let currentItem = null;
+
+      const preview = document.getElementById("preview");
+      const meta = document.getElementById("meta");
+      const randomBtn = document.getElementById("randomBtn");
+
+      const heightScaleInput = document.getElementById("heightScale");
+      const contourStepInput = document.getElementById("contourStep");
+      const heightScaleValue = document.getElementById("heightScaleValue");
+      const contourStepValue = document.getElementById("contourStepValue");
+
+      init();
+      await buildRandomTopography();
+
+      randomBtn.addEventListener("click", buildRandomTopography);
+      heightScaleInput.addEventListener("input", rebuildFromCurrentImage);
+      contourStepInput.addEventListener("input", rebuildFromCurrentImage);
+
+      function init() {
+        scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x0d1118);
+
+        camera = new THREE.PerspectiveCamera(
+          58,
+          window.innerWidth / window.innerHeight,
+          0.1,
+          5000,
+        );
+        camera.position.set(0, 135, 200);
+
+        renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.target.set(0, 0, 0);
+
+        scene.add(new THREE.AmbientLight(0xffffff, 0.9));
+
+        const sun = new THREE.DirectionalLight(0xffffff, 0.9);
+        sun.position.set(110, 170, 90);
+        scene.add(sun);
+
+        scene.add(new THREE.AxesHelper(30));
+
+        window.addEventListener("resize", onResize);
+        animate();
+      }
+
+      async function buildRandomTopography() {
+        try {
+          meta.textContent = "Cargando datos...";
+
+          const response = await fetch("./latents.json");
+          const data = await response.json();
+          const items = data.items || [];
+
+          if (!items.length) {
+            meta.textContent = "No hay items en latents.json";
+            return;
+          }
+
+          currentItem = items[Math.floor(Math.random() * items.length)];
+          const imagePath = `./imagenes_generadas/${currentItem.file}`;
+          preview.src = imagePath;
+
+          lastImageData = await readImagePixels(imagePath);
+          rebuildFromCurrentImage();
+        } catch (error) {
+          console.error(error);
+          meta.textContent = "Error generando topografía";
+        }
+      }
+
+      function rebuildFromCurrentImage() {
+        if (!lastImageData) return;
+
+        const heightScale = Number(heightScaleInput.value);
+        const contourStep = Number(contourStepInput.value);
+
+        heightScaleValue.textContent = heightScale.toFixed(0);
+        contourStepValue.textContent = contourStep.toFixed(1);
+
+        const built = createTerrainAndContours(lastImageData, {
+          heightScale,
+          contourStep,
+        });
+
+        if (terrainMesh) {
+          scene.remove(terrainMesh);
+          terrainMesh.geometry.dispose();
+          terrainMesh.material.dispose();
+        }
+
+        if (contourLines) {
+          scene.remove(contourLines);
+          contourLines.geometry.dispose();
+          contourLines.material.dispose();
+        }
+
+        terrainMesh = built.terrainMesh;
+        contourLines = built.contourLines;
+
+        scene.add(terrainMesh);
+        scene.add(contourLines);
+
+        meta.innerHTML = `
+          <strong>${currentItem?.file ?? "-"}</strong><br>
+          curvas: ${built.levelCount} niveles<br>
+          equidistancia: ${contourStep.toFixed(1)}<br>
+          exageración: ${heightScale.toFixed(0)}
+        `;
+      }
+
+      function readImagePixels(src) {
+        return new Promise((resolve, reject) => {
+          const img = new Image();
+          img.crossOrigin = "anonymous";
+          img.onload = () => {
+            const canvas = document.createElement("canvas");
+            canvas.width = img.naturalWidth;
+            canvas.height = img.naturalHeight;
+            const ctx = canvas.getContext("2d", { willReadFrequently: true });
+            ctx.drawImage(img, 0, 0);
+            resolve(ctx.getImageData(0, 0, canvas.width, canvas.height));
+          };
+          img.onerror = reject;
+          img.src = src;
+        });
+      }
+
+      function createTerrainAndContours(imageData, options) {
+        const srcW = imageData.width;
+        const srcH = imageData.height;
+        const pix = imageData.data;
+
+        const gridW = 130;
+        const gridH = Math.max(46, Math.round((srcH / srcW) * gridW));
+
+        const widthWorld = 145;
+        const depthWorld = (145 * srcH) / srcW;
+        const heightScale = options.heightScale;
+        const contourStep = options.contourStep;
+
+        const heights = new Float32Array(gridW * gridH);
+        const colors = new Float32Array(gridW * gridH * 3);
+
+        let minH = Infinity;
+        let maxH = -Infinity;
+
+        for (let y = 0; y < gridH; y++) {
+          for (let x = 0; x < gridW; x++) {
+            const u = x / (gridW - 1);
+            const v = y / (gridH - 1);
+
+            const ix = Math.min(srcW - 1, Math.floor(u * (srcW - 1)));
+            const iy = Math.min(srcH - 1, Math.floor(v * (srcH - 1)));
+            const i = (iy * srcW + ix) * 4;
+
+            const r = pix[i] / 255;
+            const g = pix[i + 1] / 255;
+            const b = pix[i + 2] / 255;
+            const lum = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+
+            const h = lum * heightScale;
+            const idx = y * gridW + x;
+            heights[idx] = h;
+
+            // Tinte hipsométrico suave
+            const t = lum;
+            const low = new THREE.Color(0x304733);
+            const mid = new THREE.Color(0x8f8a62);
+            const high = new THREE.Color(0xdeddd2);
+            const c = t < 0.55 ? low.clone().lerp(mid, t / 0.55) : mid.clone().lerp(high, (t - 0.55) / 0.45);
+
+            colors[idx * 3] = c.r;
+            colors[idx * 3 + 1] = c.g;
+            colors[idx * 3 + 2] = c.b;
+
+            if (h < minH) minH = h;
+            if (h > maxH) maxH = h;
+          }
+        }
+
+        const geo = new THREE.PlaneGeometry(widthWorld, depthWorld, gridW - 1, gridH - 1);
+        geo.rotateX(-Math.PI / 2);
+        const pos = geo.attributes.position;
+        for (let i = 0; i < heights.length; i++) {
+          pos.setY(i, heights[i]);
+        }
+        geo.setAttribute("color", new THREE.BufferAttribute(colors, 3));
+        geo.computeVertexNormals();
+
+        const terrainMat = new THREE.MeshStandardMaterial({
+          vertexColors: true,
+          roughness: 0.9,
+          metalness: 0.04,
+          side: THREE.DoubleSide,
+          flatShading: true,
+        });
+
+        const terrainMesh = new THREE.Mesh(geo, terrainMat);
+        terrainMesh.position.y = -18;
+
+        const contourPositions = [];
+        const contourLift = -18 + 0.35;
+
+        const startLevel = Math.ceil(minH / contourStep) * contourStep;
+        const endLevel = Math.floor(maxH / contourStep) * contourStep;
+
+        const levels = [];
+        for (let lv = startLevel; lv <= endLevel + 1e-6; lv += contourStep) {
+          levels.push(lv);
+        }
+
+        for (const level of levels) {
+          for (let y = 0; y < gridH - 1; y++) {
+            for (let x = 0; x < gridW - 1; x++) {
+              const x0 = (x / (gridW - 1) - 0.5) * widthWorld;
+              const x1 = ((x + 1) / (gridW - 1) - 0.5) * widthWorld;
+              const z0 = (y / (gridH - 1) - 0.5) * depthWorld;
+              const z1 = ((y + 1) / (gridH - 1) - 0.5) * depthWorld;
+
+              const h00 = heights[y * gridW + x];
+              const h10 = heights[y * gridW + (x + 1)];
+              const h11 = heights[(y + 1) * gridW + (x + 1)];
+              const h01 = heights[(y + 1) * gridW + x];
+
+              const pts = [];
+
+              addIntersection(pts, x0, z0, h00, x1, z0, h10, level);
+              addIntersection(pts, x1, z0, h10, x1, z1, h11, level);
+              addIntersection(pts, x1, z1, h11, x0, z1, h01, level);
+              addIntersection(pts, x0, z1, h01, x0, z0, h00, level);
+
+              if (pts.length === 2) {
+                contourPositions.push(
+                  pts[0].x,
+                  contourLift + level,
+                  pts[0].z,
+                  pts[1].x,
+                  contourLift + level,
+                  pts[1].z,
+                );
+              } else if (pts.length === 4) {
+                contourPositions.push(
+                  pts[0].x,
+                  contourLift + level,
+                  pts[0].z,
+                  pts[1].x,
+                  contourLift + level,
+                  pts[1].z,
+                  pts[2].x,
+                  contourLift + level,
+                  pts[2].z,
+                  pts[3].x,
+                  contourLift + level,
+                  pts[3].z,
+                );
+              }
+            }
+          }
+        }
+
+        const contourGeo = new THREE.BufferGeometry();
+        contourGeo.setAttribute(
+          "position",
+          new THREE.Float32BufferAttribute(contourPositions, 3),
+        );
+
+        const contourMat = new THREE.LineBasicMaterial({
+          color: 0x101010,
+          transparent: true,
+          opacity: 0.95,
+          depthWrite: false,
+        });
+
+        const contourLines = new THREE.LineSegments(contourGeo, contourMat);
+
+        return {
+          terrainMesh,
+          contourLines,
+          levelCount: levels.length,
+        };
+      }
+
+      function addIntersection(out, xA, zA, hA, xB, zB, hB, level) {
+        const dA = hA - level;
+        const dB = hB - level;
+
+        if (dA === 0 && dB === 0) return;
+        if (dA * dB > 0) return;
+
+        const t = dA === dB ? 0 : dA / (dA - dB);
+        const x = xA + (xB - xA) * t;
+        const z = zA + (zB - zA) * t;
+
+        if (!Number.isFinite(x) || !Number.isFinite(z)) return;
+
+        out.push({ x, z });
+      }
+
+      function onResize() {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      }
+
+      function animate() {
+        requestAnimationFrame(animate);
+        controls.update();
+        renderer.render(scene, camera);
+      }
+    </script>
+  </body>
+</html>
