@@ -23,6 +23,7 @@ for (const name of pages) {
 }
 
 export default defineConfig({
+  base: './',
   build: {
     rollupOptions: { input },
   },
