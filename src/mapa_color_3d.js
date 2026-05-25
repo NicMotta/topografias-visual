@@ -2,6 +2,8 @@ import * as THREE from 'three'
 import { createScene, startRenderLoop } from './lib/three-setup.js'
 import { getRandomItem } from './lib/load-latents.js'
 import { readImagePixels } from './lib/read-image-pixels.js'
+import { start as startAudio } from './lib/strudel-player.js'
+import { settings } from './lib/store.js'
 
 const { scene, camera, renderer, controls } = createScene({
   cameraPos: [0, 110, 180],
@@ -23,7 +25,12 @@ keyLight.position.set(90, 160, 120)
 scene.add(keyLight)
 scene.add(new THREE.AxesHelper(35))
 
-randomBtn.addEventListener('click', buildRandomMap)
+randomBtn.addEventListener('click', async () => {
+  const item = await buildRandomMap()
+  if (item) {
+    await startAudio(item)
+  }
+})
 startRenderLoop(renderer, scene, camera, controls)
 buildRandomMap()
 
@@ -34,8 +41,10 @@ async function buildRandomMap() {
     const item = await getRandomItem()
     if (!item) {
       meta.textContent = 'No hay items en latents.json'
-      return
+      return null
     }
+
+    settings.setKey('lastLatent', item)
 
     const imagePath = `./imagenes_generadas/${item.file}`
     const imageData = await readImagePixels(imagePath)
@@ -57,9 +66,12 @@ async function buildRandomMap() {
       muestras usadas: ${mesh.userData.sampleW} x ${mesh.userData.sampleH}<br>
       escala altura: ${mesh.userData.heightScale}
     `
+
+    return item
   } catch (error) {
     console.error(error)
     meta.textContent = 'Error al generar el mapa 3D'
+    return null
   }
 }
 
