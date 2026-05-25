@@ -117,36 +117,49 @@ function buildPatterns(depth, chaos) {
 }
 
 async function start() {
-  const item = await getRandomItem();
+  try {
+    const item = await getRandomItem();
 
-  settings.setKey("lastLatent", item);
-  audioState.setKey("isPlaying", true);
+    if (!item) {
+      throw new Error("No hay items disponibles en latents.json");
+    }
 
-  $("#preview").src = `./imagenes_generadas/${item.file}`;
-  renderInfo(item);
+    settings.setKey("lastLatent", item);
+    audioState.setKey("isPlaying", true);
 
-  const c1d = item.coord_1d || 0;
-  const { x = 0, y = 0, z = 0 } = item.coord_3d || {};
+    $("#preview").src = `./imagenes_generadas/${item.file}`;
+    renderInfo(item);
 
-  const bpm = clamp(mapRange(c1d, -5, 5, 80, 180), 60, 240);
-  const space = clamp(mapRange(x, -3, 3, 0.5, 1), 0, 1);
-  const depth = Math.round(clamp(mapRange(y, -3, 3, 2, 10), 1, 16));
-  const chaos = Math.round(clamp(mapRange(z, -3, 3, 4, 16), 1, 20));
+    const c1d = item.coord_1d || 0;
+    const { x = 0, y = 0, z = 0 } = item.coord_3d || {};
 
-  if (isPlaying) {
-    await stop();
+    const bpm = clamp(mapRange(c1d, -5, 5, 80, 180), 60, 240);
+    const space = clamp(mapRange(x, -3, 3, 0.5, 1), 0, 1);
+    const depth = Math.round(clamp(mapRange(y, -3, 3, 2, 10), 1, 16));
+    const chaos = Math.round(clamp(mapRange(z, -3, 3, 4, 16), 1, 20));
+
+    if (isPlaying) {
+      await stop();
+    }
+
+    await Tone.start();
+    buildAudioGraph(space);
+    Tone.Transport.bpm.value = bpm;
+    buildPatterns(depth, chaos);
+    Tone.Transport.start();
+    isPlaying = true;
+
+    $("#startBtn").disabled = true;
+    $("#stopBtn").disabled = false;
+    $("#status").textContent = "▶ Sonando";
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Error desconocido";
+    console.error("Error al iniciar Tone + Latents:", err);
+    audioState.setKey("isPlaying", false);
+    $("#startBtn").disabled = false;
+    $("#stopBtn").disabled = true;
+    $("#status").textContent = `Error: ${message}`;
   }
-
-  await Tone.start();
-  buildAudioGraph(space);
-  Tone.Transport.bpm.value = bpm;
-  buildPatterns(depth, chaos);
-  Tone.Transport.start();
-  isPlaying = true;
-
-  $("#startBtn").disabled = true;
-  $("#stopBtn").disabled = false;
-  $("#status").textContent = "▶ Sonando";
 }
 
 async function stop() {
