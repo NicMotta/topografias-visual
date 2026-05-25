@@ -210,39 +210,32 @@
             <a class="btn" href="./noir_ascii_latent.html">Abrir</a>
           </div>
         </article>
+
+        <article class="card">
+          <h2>Strudel + Latents</h2>
+          <p>
+            Prueba de concepto con Strudel: drone ambiental con sine waves,
+            reverb, delay y textura aleatoria modulada por latents.
+          </p>
+          <div class="actions">
+            <a class="btn" href="./strudel_prueba.html">Abrir</a>
+          </div>
+        </article>
+
+        <article class="card">
+          <h2>Tone.js + Latents</h2>
+          <p>
+            Misma composición que Strudel pero implementada con Tone.js:
+            PolySynth, secuencias rítmicas y efectos en cadena.
+          </p>
+          <div class="actions">
+            <a class="btn" href="./tone_prueba.html">Abrir</a>
+          </div>
+        </article>
       </div>
     </div>
 
-    <script type="module">
-      async function loadStats() {
-        const statsEl = document.getElementById("stats");
-
-        try {
-          const [latentsRes, modelRes] = await Promise.all([
-            fetch("./latents.json"),
-            fetch("./latents.json"),
-          ]);
-
-          if (!latentsRes.ok || !modelRes.ok) throw new Error("fetch failed");
-
-          const latents = await latentsRes.json();
-          const model = await modelRes.json();
-
-          const total = latents.items?.length ?? 0;
-          const modelName = model.model_name ?? "-";
-          const latentDim = model.latent_dim ?? "-";
-
-          statsEl.innerHTML =
-            `<strong>Dataset:</strong> ${modelName} · ` +
-            `<strong>Imágenes:</strong> ${total} · ` +
-            `<strong>Latent dim:</strong> ${latentDim}`;
-        } catch {
-          statsEl.textContent =
-            "No se pudieron cargar las métricas del catálogo.";
-        }
-      }
-
-      loadStats();
-    </script>
+    <script type="module" src="./src/index.js"></script>
+  
   </body>
 </html>
