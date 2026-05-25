@@ -2,7 +2,7 @@ let cache = null;
 
 export async function fetchLatents() {
   if (cache) return cache;
-  const latentsUrl = new URL("../latents.json", import.meta.url);
+  const latentsUrl = `${import.meta.env.BASE_URL}latents.json`;
   const res = await fetch(latentsUrl);
 
   if (!res.ok) {
