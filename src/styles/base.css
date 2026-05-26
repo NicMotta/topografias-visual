@@ -1,14 +1,24 @@
+:root {
+  --bg: #0a0a0b;
+  --surface: #111113;
+  --border: rgba(255,255,255,0.08);
+  --text: #e8e8e8;
+  --text-dim: #a0a0a0;
+  --accent: #e8e8e8;
+  --radius: 8px;
+}
+
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 html, body {
   min-height: 100%;
-  background: #0f1220;
-  font-family: system-ui, sans-serif;
-  color: #eee;
+  background: var(--bg);
+  font-family: system-ui, -apple-system, sans-serif;
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 canvas { display: block; }
-
 button { cursor: pointer; }
-
-img { display: block; }
+img { display: block; max-width: 100%; }
