@@ -1,6 +1,6 @@
-import { getRandomItem } from "./lib/load-latents.js";
-import { settings } from "./lib/store.js";
-import { start as startAudio, stop as stopAudio } from "./lib/tone-player.js";
+import { getRandomItem } from "../lib/load-latents.js";
+import { settings } from "../lib/store.js";
+import { start as startAudio, stop as stopAudio } from "../lib/tone-player.js";
 
 const $ = (id) => document.getElementById(id.replace("#", ""));
 

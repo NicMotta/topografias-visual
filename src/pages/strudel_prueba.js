@@ -1,6 +1,6 @@
-import { getRandomItem } from "./lib/load-latents.js";
-import { settings } from "./lib/store.js";
-import { start as startAudio, stop as stopAudio } from "./lib/strudel-player.js";
+import { getRandomItem } from "../lib/load-latents.js";
+import { settings } from "../lib/store.js";
+import { start as startAudio, stop as stopAudio } from "../lib/strudel-player.js";
 
 const $ = (id) => document.getElementById(id.replace("#", ""));
 

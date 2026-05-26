@@ -1,9 +1,9 @@
 import * as THREE from 'three'
-import { createScene, startRenderLoop } from './lib/three-setup.js'
-import { getRandomItem } from './lib/load-latents.js'
-import { readImagePixels } from './lib/read-image-pixels.js'
-import { start as startAudio } from './lib/strudel-player.js'
-import { settings } from './lib/store.js'
+import { createScene, startRenderLoop } from '../lib/three-setup.js'
+import { getRandomItem } from '../lib/load-latents.js'
+import { readImagePixels } from '../lib/read-image-pixels.js'
+import { start as startAudio } from '../lib/strudel-player.js'
+import { settings } from '../lib/store.js'
 
 const { scene, camera, renderer, controls } = createScene({
   cameraPos: [0, 110, 180],

@@ -1,6 +1,6 @@
 import * as THREE from 'three'
-import { createScene, startRenderLoop } from './lib/three-setup.js'
-import { fetchLatents } from './lib/load-latents.js'
+import { createScene, startRenderLoop } from '../lib/three-setup.js'
+import { fetchLatents } from '../lib/load-latents.js'
 
 const { scene, camera, renderer, controls, raycaster, pointer } = createScene({
   cameraPos: [0, 0, 180],

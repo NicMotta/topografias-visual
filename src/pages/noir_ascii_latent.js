@@ -1,5 +1,5 @@
-import { getRandomItem } from './lib/load-latents.js'
-import { readImagePixels } from './lib/read-image-pixels.js'
+import { getRandomItem } from '../lib/load-latents.js'
+import { readImagePixels } from '../lib/read-image-pixels.js'
 
 const canvas = document.getElementById('canvas')
 const ctx = canvas.getContext('2d')

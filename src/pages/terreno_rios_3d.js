@@ -1,7 +1,7 @@
 import * as THREE from 'three'
-import { createScene, startRenderLoop } from './lib/three-setup.js'
-import { getRandomItem } from './lib/load-latents.js'
-import { readImagePixels } from './lib/read-image-pixels.js'
+import { createScene, startRenderLoop } from '../lib/three-setup.js'
+import { getRandomItem } from '../lib/load-latents.js'
+import { readImagePixels } from '../lib/read-image-pixels.js'
 
 const { scene, camera, renderer, controls } = createScene({
   cameraPos: [0, 120, 190],

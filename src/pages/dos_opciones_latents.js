@@ -1,4 +1,4 @@
-import { fetchLatents } from './lib/load-latents.js'
+import { fetchLatents } from '../lib/load-latents.js'
 
 let items = []
 let sorted = []
