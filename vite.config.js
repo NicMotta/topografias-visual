@@ -24,11 +24,11 @@ for (const name of pages) {
     : resolve(__dirname, `src/pages/${name}/index.html`)
 }
 
-export default defineConfig({
-  base: '/',
+export default defineConfig(({ mode }) => ({
+  base: mode === 'production' ? '/topografias-visual/' : '/',
   build: {
     outDir: resolve(__dirname, 'dist'),
     emptyOutDir: true,
     rollupOptions: { input },
   },
-})
+}))
