@@ -43,7 +43,7 @@ async function loadRandomArt() {
     if (!item) return
 
     current = item
-    const imagePath = `/imagenes_generadas/${item.file}`
+    const imagePath = `${import.meta.env.BASE_URL}imagenes_generadas/${item.file}`
     preview.src = imagePath
 
     const imageData = await readImagePixels(imagePath)

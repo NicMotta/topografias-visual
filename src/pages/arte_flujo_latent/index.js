@@ -56,7 +56,7 @@ async function loadRandomArtwork() {
     const item = await getRandomItem()
     if (!item) return
 
-    const imagePath = `/imagenes_generadas/${item.file}`
+    const imagePath = `${import.meta.env.BASE_URL}imagenes_generadas/${item.file}`
 
     const imageData = await readImagePixels(imagePath)
     buildParticleArtwork(imageData)

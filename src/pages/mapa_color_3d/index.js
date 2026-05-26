@@ -47,7 +47,7 @@ async function buildRandomMap() {
 
     settings.setKey('lastLatent', item)
 
-    const imagePath = `/imagenes_generadas/${item.file}`
+    const imagePath = `${import.meta.env.BASE_URL}imagenes_generadas/${item.file}`
     const imageData = await readImagePixels(imagePath)
     const mesh = createHeightMeshFromImage(imageData)
 

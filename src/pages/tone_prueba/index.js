@@ -25,7 +25,7 @@ async function start() {
 
     settings.setKey("lastLatent", item);
 
-    $("#preview").src = `/imagenes_generadas/${item.file}`;
+    $("#preview").src = `${import.meta.env.BASE_URL}imagenes_generadas/${item.file}`;
     renderInfo(item);
 
     await startAudio(item);

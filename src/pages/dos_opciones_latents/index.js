@@ -51,7 +51,7 @@ function renderCurrent() {
   if (!sorted.length) return
   const item = sorted[currentIndex]
 
-  mainImg.src = `/imagenes_generadas/${item.file}`
+  mainImg.src = `${import.meta.env.BASE_URL}imagenes_generadas/${item.file}`
 
   const percentile = ((currentIndex / Math.max(sorted.length - 1, 1)) * 100).toFixed(1)
 
@@ -132,7 +132,7 @@ function renderNeighbors(base) {
     card.className = 'card'
 
     const img = document.createElement('img')
-    img.src = `/imagenes_generadas/${n.item.file}`
+    img.src = `${import.meta.env.BASE_URL}imagenes_generadas/${n.item.file}`
     img.alt = n.item.file
     img.title = 'Click para usar esta imagen como base'
     img.addEventListener('click', () => {

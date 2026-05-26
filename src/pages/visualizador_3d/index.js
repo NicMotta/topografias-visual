@@ -91,7 +91,7 @@ function onClick(event) {
     selected.material.color.set(0xff0000)
     selectedPoint = selected
 
-    previewImage.src = `/imagenes_generadas/${item.file}`
+    previewImage.src = `${import.meta.env.BASE_URL}imagenes_generadas/${item.file}`
     previewMeta.innerHTML = `
       <strong>${item.file}</strong><br>
       latent_hash_num: ${item.latent_hash_num}<br>

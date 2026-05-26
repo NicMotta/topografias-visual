@@ -50,7 +50,7 @@ async function buildRandomTopography() {
     }
 
     currentItem = item
-    const imagePath = `/imagenes_generadas/${item.file}`
+    const imagePath = `${import.meta.env.BASE_URL}imagenes_generadas/${item.file}`
     preview.src = imagePath
 
     lastImageData = await readImagePixels(imagePath)
