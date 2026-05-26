@@ -1,4 +1,4 @@
-import { getDatasetInfo } from '../lib/load-latents.js'
+import { getDatasetInfo } from './lib/load-latents.js'
 
 async function loadStats() {
   const statsEl = document.getElementById('stats')

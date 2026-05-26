@@ -19,12 +19,16 @@ const pages = [
 
 const input = {}
 for (const name of pages) {
-  input[name] = resolve(__dirname, `${name}.html`)
+  input[name] = name === 'index'
+    ? resolve(__dirname, 'index.html')
+    : resolve(__dirname, `src/pages/${name}.html`)
 }
 
 export default defineConfig({
-  base: './',
+  base: '/',
   build: {
+    outDir: resolve(__dirname, 'dist'),
+    emptyOutDir: true,
     rollupOptions: { input },
   },
 })

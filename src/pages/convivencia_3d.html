@@ -3,56 +3,67 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Flujo cromático</title>
+    <title>Convivencia 3D | Puntos + Mapa</title>
     <style>
       html,
       body {
         margin: 0;
         padding: 0;
         overflow: hidden;
-        background: #05060a;
+        background: #0f1014;
         font-family: Arial, sans-serif;
       }
 
-      #panel {
+      #leftPanel,
+      #rightPanel {
         position: absolute;
         top: 12px;
-        left: 12px;
         z-index: 10;
-        width: 320px;
         color: #fff;
-        background: rgba(0, 0, 0, 0.68);
+        background: rgba(0, 0, 0, 0.72);
         border: 1px solid rgba(255, 255, 255, 0.12);
         border-radius: 12px;
         padding: 12px;
       }
 
-      #panel button {
+      #leftPanel {
+        left: 12px;
+        width: 300px;
+      }
+
+      #rightPanel {
+        right: 12px;
+        width: 300px;
+      }
+
+      #leftPanel button {
         margin-top: 8px;
         border: 0;
         border-radius: 8px;
         padding: 8px 10px;
-        background: #7b5cff;
+        background: #2f7cff;
         color: #fff;
         cursor: pointer;
       }
 
-      #panel button:hover {
-        background: #9076ff;
+      #leftPanel button:hover {
+        background: #4d8fff;
       }
 
       #preview {
         width: 100%;
         border-radius: 8px;
         margin-top: 8px;
-        background: #111;
+        display: block;
+        background: #1a1a1a;
       }
 
-      #meta {
-        margin-top: 8px;
+      #meta,
+      #mapMeta {
         font-size: 12px;
-        line-height: 1.35;
+        margin-top: 8px;
         word-break: break-word;
+        line-height: 1.35;
       }
 
       canvas {
@@ -70,15 +81,23 @@
     </script>
   </head>
   <body>
-    <div id="panel">
-      <strong>Opción artística: Flujo cromático</strong><br />
-      Interpreta una imagen como nube de partículas viva.
-      <button id="randomBtn">Otra imagen aleatoria</button>
-      <img id="preview" alt="preview" />
-      <div id="meta">Cargando...</div>
+    <div id="leftPanel">
+      <strong>Convivencia 3D</strong><br />
+      - Izquierda: nube de puntos (latents)<br />
+      - Derecha: mapa de altura (imagen)<br />
+      - Click en punto actualiza mapa + preview
+      <br />
+      <button id="randomMapBtn">Mapa aleatorio</button>
+      <div id="meta">Cargando datos...</div>
     </div>
 
-    <script type="module" src="./src/pages/arte_flujo_latent.js"></script>
+    <div id="rightPanel">
+      <strong>Preview de imagen activa</strong>
+      <img id="preview" alt="preview" />
+      <div id="mapMeta">Sin mapa generado.</div>
+    </div>
+
+    <script type="module" src="./convivencia_3d.js"></script>
   
   </body>
 </html>

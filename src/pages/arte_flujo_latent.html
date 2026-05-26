@@ -3,56 +3,55 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Mapa 3D por color</title>
+    <title>Flujo cromático</title>
     <style>
       html,
       body {
         margin: 0;
         padding: 0;
         overflow: hidden;
-        background: #0e0e0e;
+        background: #05060a;
         font-family: Arial, sans-serif;
       }
 
-      #hud {
+      #panel {
         position: absolute;
         top: 12px;
         left: 12px;
         z-index: 10;
+        width: 320px;
         color: #fff;
-        background: rgba(0, 0, 0, 0.72);
+        background: rgba(0, 0, 0, 0.68);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 12px;
         padding: 12px;
-        border-radius: 10px;
-        max-width: 340px;
-        font-size: 13px;
-        line-height: 1.35;
       }
 
-      #hud button {
+      #panel button {
         margin-top: 8px;
         border: 0;
         border-radius: 8px;
         padding: 8px 10px;
-        background: #2f7cff;
+        background: #7b5cff;
         color: #fff;
         cursor: pointer;
       }
 
-      #hud button:hover {
-        background: #4b8dff;
+      #panel button:hover {
+        background: #9076ff;
       }
 
       #preview {
         width: 100%;
-        margin-top: 8px;
         border-radius: 8px;
-        display: block;
-        background: #1e1e1e;
-        object-fit: contain;
+        margin-top: 8px;
+        background: #111;
       }
 
       #meta {
         margin-top: 8px;
+        font-size: 12px;
+        line-height: 1.35;
         word-break: break-word;
       }
 
@@ -71,19 +70,15 @@
     </script>
   </head>
   <body>
-    <div id="hud">
-      <strong>Mapa 3D desde color</strong><br />
-      - Toma una imagen aleatoria de <em>imagenes_generadas</em><br />
-      - Usa la luminancia del pixel para altura<br />
-      - Color original del pixel en la malla
-
-      <button id="randomBtn">Elegir otra imagen aleatoria</button>
-
-      <img id="preview" alt="Preview de imagen seleccionada" />
+    <div id="panel">
+      <strong>Opción artística: Flujo cromático</strong><br />
+      Interpreta una imagen como nube de partículas viva.
+      <button id="randomBtn">Otra imagen aleatoria</button>
+      <img id="preview" alt="preview" />
       <div id="meta">Cargando...</div>
     </div>
 
-    <script type="module" src="./src/pages/mapa_color_3d.js"></script>
+    <script type="module" src="./arte_flujo_latent.js"></script>
   
   </body>
 </html>
