@@ -1,0 +1,14 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  min-height: 100%;
+  background: #0f1220;
+  font-family: system-ui, sans-serif;
+  color: #eee;
+}
+
+canvas { display: block; }
+
+button { cursor: pointer; }
+
+img { display: block; }

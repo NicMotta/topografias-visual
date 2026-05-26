@@ -1,0 +1,15 @@
+html, body { overflow: hidden; background: #04070c; font-family: Arial, sans-serif; }
+
+#panel {
+  position: absolute; top: 12px; left: 12px; width: 320px; z-index: 10;
+  color: #fff; background: rgba(0,0,0,0.7);
+  border: 1px solid rgba(255,255,255,0.14);
+  border-radius: 12px; padding: 12px;
+}
+
+#panel button { margin-top: 8px; border: 0; border-radius: 8px; padding: 8px 10px; background: #23b2ff; color: #fff; }
+#panel button:hover { background: #46beff; }
+
+#preview { width: 100%; border-radius: 8px; margin-top: 8px; background: #111; }
+#meta { margin-top: 8px; font-size: 12px; line-height: 1.35; word-break: break-word; }
+#c { display: block; }

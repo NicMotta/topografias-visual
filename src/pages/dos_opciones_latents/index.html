@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>2 opciones extra | Imagen + Latents</title>
+    <link rel="stylesheet" href="./index.css">
+  </head>
+  <body>
+    <div class="wrap">
+      <h1>Dos opciones extra con imágenes + latents</h1>
+      <p class="lead">
+        Opción 1: secuencia por <strong>coord_1d</strong>. Opción 2: vecinos más
+        cercanos en el espacio <strong>coord_3d</strong>.
+      </p>
+
+      <section class="panel">
+        <strong>Opción 1 — Timeline por coord_1d</strong>
+        <div class="actions">
+          <button id="prevBtn">Anterior</button>
+          <button id="nextBtn">Siguiente</button>
+          <button id="randomBtn">Aleatorio</button>
+        </div>
+        <div style="margin-top: 10px">
+          <input id="indexSlider" type="range" min="0" max="0" value="0" />
+        </div>
+      </section>
+
+      <section class="panel row">
+        <div>
+          <img id="mainImg" alt="imagen seleccionada" />
+          <div id="mainMeta" class="meta">Cargando...</div>
+        </div>
+        <div>
+          <canvas id="spark" width="740" height="120"></canvas>
+          <div class="small" id="sparkMeta"></div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <strong>Opción 2 — Vecinos más cercanos en coord_3d</strong>
+        <div class="small" id="neighborsMeta" style="margin: 8px 0 10px">
+          Calculando...
+        </div>
+        <div id="neighbors"></div>
+      </section>
+    </div>
+
+    <script type="module" src="./index.js"></script>
+  
+  </body>
+</html>

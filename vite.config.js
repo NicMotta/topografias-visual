@@ -21,7 +21,7 @@ const input = {}
 for (const name of pages) {
   input[name] = name === 'index'
     ? resolve(__dirname, 'index.html')
-    : resolve(__dirname, `src/pages/${name}.html`)
+    : resolve(__dirname, `src/pages/${name}/index.html`)
 }
 
 export default defineConfig({

@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Flujo cromático</title>
+    <link rel="stylesheet" href="./index.css" />
+
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+          "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <div id="panel">
+      <strong>Opción artística: Flujo cromático</strong><br />
+      Interpreta una imagen como nube de partículas viva.
+      <button id="randomBtn">Otra imagen aleatoria</button>
+      <img id="preview" alt="preview" />
+      <div id="meta">Cargando...</div>
+    </div>
+
+    <script type="module" src="./index.js"></script>
+  </body>
+</html>

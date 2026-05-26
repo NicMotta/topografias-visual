@@ -1,0 +1,22 @@
+html, body { overflow: hidden; background: #111; font-family: Arial, sans-serif; }
+
+#info {
+  position: absolute; top: 12px; left: 12px; z-index: 10;
+  color: white; background: rgba(0,0,0,0.65);
+  padding: 12px; border-radius: 10px; max-width: 320px;
+  font-size: 14px; line-height: 1.4;
+}
+
+#previewPanel {
+  position: absolute; right: 12px; top: 12px; width: 260px;
+  background: rgba(0,0,0,0.75); padding: 10px; border-radius: 10px;
+  color: white; z-index: 10;
+}
+
+#previewImage {
+  width: 100%; display: block; border-radius: 8px;
+  margin-bottom: 8px; background: #222;
+  min-height: 120px; object-fit: contain;
+}
+
+#previewMeta { font-size: 12px; word-break: break-word; }

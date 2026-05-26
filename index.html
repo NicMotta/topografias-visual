@@ -4,92 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Catálogo | Visualizador</title>
-    <style>
-      html,
-      body {
-        margin: 0;
-        padding: 0;
-        min-height: 100%;
-        background: radial-gradient(
-          circle at top,
-          #1b2238 0%,
-          #0f1220 45%,
-          #0a0c12 100%
-        );
-        font-family: Arial, sans-serif;
-        color: #fff;
-      }
-
-      .wrap {
-        max-width: 920px;
-        margin: 0 auto;
-        padding: 28px 18px 42px;
-      }
-
-      h1 {
-        margin: 0 0 8px;
-        font-size: 30px;
-      }
-
-      .lead {
-        margin: 0 0 18px;
-        opacity: 0.92;
-      }
-
-      .stats {
-        margin: 0 0 18px;
-        background: rgba(255, 255, 255, 0.08);
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        border-radius: 12px;
-        padding: 10px 12px;
-        font-size: 14px;
-      }
-
-      .grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-        gap: 14px;
-      }
-
-      .card {
-        background: rgba(255, 255, 255, 0.08);
-        border: 1px solid rgba(255, 255, 255, 0.14);
-        border-radius: 14px;
-        padding: 14px;
-      }
-
-      .card h2 {
-        margin: 0 0 8px;
-        font-size: 18px;
-      }
-
-      .card p {
-        margin: 0 0 10px;
-        font-size: 14px;
-        opacity: 0.92;
-      }
-
-      .actions {
-        display: flex;
-        gap: 8px;
-        flex-wrap: wrap;
-      }
-
-      .btn {
-        display: inline-block;
-        text-decoration: none;
-        color: #fff;
-        background: #2f7cff;
-        border: 1px solid #4e90ff;
-        border-radius: 10px;
-        padding: 8px 11px;
-        font-size: 14px;
-      }
-
-      .btn:hover {
-        background: #4b8dff;
-      }
-    </style>
+    <link rel="stylesheet" href="./src/index.css" />
   </head>
   <body>
     <div class="wrap">
@@ -106,7 +21,7 @@
             preview de la imagen y sus coordenadas.
           </p>
           <div class="actions">
-            <a class="btn" href="./visualizador_3d.html">Abrir</a>
+            <a class="btn" href="./src/pages/visualizador_3d/">Abrir</a>
           </div>
         </article>
 
@@ -117,7 +32,7 @@
             luminancia de píxeles.
           </p>
           <div class="actions">
-            <a class="btn" href="./mapa_color_3d.html">Abrir</a>
+            <a class="btn" href="./src/pages/mapa_color_3d/">Abrir</a>
           </div>
         </article>
 
@@ -128,7 +43,7 @@
             más cartográfica del relieve.
           </p>
           <div class="actions">
-            <a class="btn" href="./mapa_topografico_3d.html">Abrir</a>
+            <a class="btn" href="./src/pages/mapa_topografico_3d/">Abrir</a>
           </div>
         </article>
 
@@ -139,7 +54,7 @@
             simulando ríos guiados por pendiente y latent.
           </p>
           <div class="actions">
-            <a class="btn" href="./terreno_rios_3d.html">Abrir</a>
+            <a class="btn" href="./src/pages/terreno_rios_3d/">Abrir</a>
           </div>
         </article>
 
@@ -150,7 +65,7 @@
             visualización. Al seleccionar un punto se actualiza el mapa.
           </p>
           <div class="actions">
-            <a class="btn" href="./convivencia_3d.html">Abrir</a>
+            <a class="btn" href="./src/pages/convivencia_3d/">Abrir</a>
           </div>
         </article>
 
@@ -161,7 +76,7 @@
             coord_3d con miniaturas interactivas.
           </p>
           <div class="actions">
-            <a class="btn" href="./dos_opciones_latents.html"
+            <a class="btn" href="./src/pages/dos_opciones_latents/"
               >Abrir opciones extra</a
             >
           </div>
@@ -174,7 +89,7 @@
             aleatoria del dataset.
           </p>
           <div class="actions">
-            <a class="btn" href="./arte_flujo_latent.html">Abrir</a>
+            <a class="btn" href="./src/pages/arte_flujo_latent/">Abrir</a>
           </div>
         </article>
 
@@ -185,7 +100,9 @@
             de latents, con estética de nebula en movimiento.
           </p>
           <div class="actions">
-            <a class="btn" href="./arte_kaleidoscopio_latent.html">Abrir</a>
+            <a class="btn" href="./src/pages/arte_kaleidoscopio_latent/"
+              >Abrir</a
+            >
           </div>
         </article>
 
@@ -196,7 +113,7 @@
             low-poly y color tomado del original.
           </p>
           <div class="actions">
-            <a class="btn" href="./ascii_lowpoly_latent.html">Abrir</a>
+            <a class="btn" href="./src/pages/ascii_lowpoly_latent/">Abrir</a>
           </div>
         </article>
 
@@ -207,7 +124,7 @@
             dramática de la imagen.
           </p>
           <div class="actions">
-            <a class="btn" href="./noir_ascii_latent.html">Abrir</a>
+            <a class="btn" href="./src/pages/noir_ascii_latent/">Abrir</a>
           </div>
         </article>
 
@@ -218,7 +135,7 @@
             reverb, delay y textura aleatoria modulada por latents.
           </p>
           <div class="actions">
-            <a class="btn" href="./strudel_prueba.html">Abrir</a>
+            <a class="btn" href="./src/pages/strudel_prueba/">Abrir</a>
           </div>
         </article>
 
@@ -229,13 +146,12 @@
             PolySynth, secuencias rítmicas y efectos en cadena.
           </p>
           <div class="actions">
-            <a class="btn" href="./tone_prueba.html">Abrir</a>
+            <a class="btn" href="./src/pages/tone_prueba/">Abrir</a>
           </div>
         </article>
       </div>
     </div>
 
     <script type="module" src="./src/index.js"></script>
-  
   </body>
 </html>

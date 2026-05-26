@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Convivencia 3D | Puntos + Mapa</title>
+    <link rel="stylesheet" href="./index.css">
+
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+          "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <div id="leftPanel">
+      <strong>Convivencia 3D</strong><br />
+      - Izquierda: nube de puntos (latents)<br />
+      - Derecha: mapa de altura (imagen)<br />
+      - Click en punto actualiza mapa + preview
+      <br />
+      <button id="randomMapBtn">Mapa aleatorio</button>
+      <div id="meta">Cargando datos...</div>
+    </div>
+
+    <div id="rightPanel">
+      <strong>Preview de imagen activa</strong>
+      <img id="preview" alt="preview" />
+      <div id="mapMeta">Sin mapa generado.</div>
+    </div>
+
+    <script type="module" src="./index.js"></script>
+  
+  </body>
+</html>

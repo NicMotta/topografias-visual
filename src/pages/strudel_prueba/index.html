@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Strudel + Latents · Prueba</title>
+    <link rel="stylesheet" href="./index.css">
+  </head>
+  <body>
+    <div id="app">
+      <header>
+        <h1>Strudel + Latents</h1>
+        <div class="status" id="status">Cargando…</div>
+      </header>
+
+      <div class="panel">
+        <div class="image-area">
+          <img id="preview" alt="preview" />
+        </div>
+        <table>
+          <tr><th>coord_1d</th><td id="coord1d">-</td></tr>
+          <tr><th>coord_3d</th><td id="coord3d">-</td></tr>
+          <tr><th>hash</th><td id="hash">-</td></tr>
+          <tr><th>archivo</th><td id="filename">-</td></tr>
+        </table>
+        <div class="controls">
+          <button id="startBtn">Iniciar</button>
+          <button id="stopBtn" disabled>Detener</button>
+        </div>
+        <div class="pulse" id="pulse"></div>
+      </div>
+    </div>
+    <script type="module" src="./index.js"></script>
+  </body>
+</html>

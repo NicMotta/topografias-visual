@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Noir ASCII Latent</title>
+    <link rel="stylesheet" href="./index.css">
+  </head>
+  <body>
+    <div id="panel">
+      <strong>Noir ASCII</strong><br />
+      Blanco y negro, con textura tipo grabado, dithering y ritmo latente.
+      <div class="hint">- más contraste: más densidad visual</div>
+      <div class="hint">- controlá el dramatismo con los sliders</div>
+
+      <button id="randomBtn">Otra imagen / otro clima</button>
+
+      <div class="control">
+        <label>
+          <span>Contraste</span>
+          <span id="contrastValue">1.45</span>
+        </label>
+        <input id="contrastSlider" type="range" min="0.6" max="2.8" step="0.05" value="1.45" />
+      </div>
+
+      <div class="control">
+        <label>
+          <span>Densidad</span>
+          <span id="densityValue">1.00</span>
+        </label>
+        <input id="densitySlider" type="range" min="0.7" max="1.5" step="0.05" value="1" />
+      </div>
+
+      <img id="preview" alt="preview" />
+      <div id="meta">Cargando...</div>
+    </div>
+
+    <canvas id="canvas"></canvas>
+
+    <script type="module" src="./index.js"></script>
+  
+  </body>
+</html>
