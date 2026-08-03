@@ -1,0 +1,168 @@
+#app {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 28px 18px 42px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+h1 {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.status {
+  font-size: 13px;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+
+.field > span {
+  font-size: 13px;
+  color: var(--text-dim);
+}
+
+select {
+  width: 100%;
+  padding: 10px;
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) - 2px);
+  font-size: 14px;
+}
+
+select:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.controls {
+  display: flex;
+  gap: 10px;
+}
+
+button {
+  flex: 1;
+  padding: 10px;
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) - 2px);
+  font-size: 14px;
+  font-weight: 500;
+  transition: opacity 0.15s;
+}
+
+button:hover:not(:disabled) { opacity: 0.75; }
+
+button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.indicator {
+  align-items: center;
+  text-align: center;
+  padding: 28px 16px;
+  gap: 14px;
+}
+
+.light {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #1c1c1f;
+  border: 1px solid var(--border);
+  transition: opacity 0.05s linear;
+}
+
+.light.on {
+  background: #4ade80;
+  border-color: #4ade80;
+  box-shadow: 0 0 24px rgba(74, 222, 128, 0.7), 0 0 6px rgba(74, 222, 128, 0.9);
+}
+
+.name {
+  font-size: 30px;
+  font-weight: 600;
+  font-family: monospace;
+  line-height: 1.1;
+}
+
+.sub {
+  font-size: 14px;
+  color: var(--text-dim);
+  font-family: monospace;
+}
+
+.last-label {
+  font-size: 12px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.history {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.history li {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 7px 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) - 2px);
+  font-size: 13px;
+}
+
+.h-name {
+  font-weight: 600;
+  font-family: monospace;
+  color: var(--accent);
+}
+
+.h-sub {
+  flex: 1;
+  color: var(--text-dim);
+  font-family: monospace;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.h-ch {
+  color: var(--text-dim);
+  font-size: 12px;
+  font-family: monospace;
+}

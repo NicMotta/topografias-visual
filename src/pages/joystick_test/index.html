@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Joystick Test · Identificación de controles</title>
+    <link rel="stylesheet" href="./index.css" />
+  </head>
+  <body>
+    <div id="app">
+      <header>
+        <h1>Joystick Test</h1>
+        <div class="status" id="status">Buscando…</div>
+      </header>
+
+      <div class="panel">
+        <label class="field">
+          <span>Joystick / Gamepad</span>
+          <select id="gamepadSelect" disabled>
+            <option>Cargando…</option>
+          </select>
+        </label>
+        <div class="controls">
+          <button id="rescanBtn">Buscar dispositivos</button>
+        </div>
+      </div>
+
+      <div class="panel indicator">
+        <div class="light" id="light"></div>
+        <div class="name" id="eventName">—</div>
+        <div class="sub" id="eventSub">Esperando evento…</div>
+      </div>
+
+      <div class="panel">
+        <div class="last-label">Últimos eventos</div>
+        <ul class="history" id="history"></ul>
+      </div>
+
+      <div class="panel">
+        <div class="last-label">Mapa de controles</div>
+        <div class="map">
+          <div class="map-col">
+            <div class="map-title">Botones</div>
+            <div class="buttons" id="mapButtons"></div>
+          </div>
+          <div class="map-col">
+            <div class="map-title">Ejes</div>
+            <div class="axes" id="mapAxes"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script type="module" src="./index.js"></script>
+  </body>
+</html>

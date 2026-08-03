@@ -15,6 +15,10 @@ const pages = [
   'dos_opciones_latents',
   'strudel_prueba',
   'tone_prueba',
+  'prueba_microfono',
+  'midi_test',
+  'joystick_test',
+  'conferencia_interactiva',
 ]
 
 const input = {}

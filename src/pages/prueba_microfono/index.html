@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Prueba Micrófono · Monitor en tiempo real</title>
+    <link rel="stylesheet" href="./index.css" />
+  </head>
+  <body>
+    <div id="app">
+      <header>
+        <h1>Prueba de micrófono</h1>
+        <div class="status" id="status">Listo</div>
+      </header>
+
+      <div class="panel">
+        <label class="field">
+          <span>Dispositivo de grabación</span>
+          <select id="deviceSelect" disabled>
+            <option>Cargando dispositivos…</option>
+          </select>
+        </label>
+
+        <div class="field-row">
+          <label class="field">
+            <span>Volumen de monitor</span>
+            <input id="volume" type="range" min="0" max="100" value="70" />
+          </label>
+          <label class="field toggle">
+            <span>Eco (karaoke)</span>
+            <input id="echo" type="checkbox" checked />
+          </label>
+        </div>
+
+        <div class="meter">
+          <div class="meter-bar" id="meterBar"></div>
+        </div>
+
+        <div class="controls">
+          <button id="startBtn">Escuchar</button>
+          <button id="stopBtn" disabled>Detener</button>
+        </div>
+      </div>
+    </div>
+    <script type="module" src="./index.js"></script>
+  </body>
+</html>

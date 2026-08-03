@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Conferencia Interactiva · BPM</title>
+    <link rel="stylesheet" href="./index.css" />
+  </head>
+  <body>
+    <div id="app">
+      <header>
+        <h1>Conferencia Interactiva</h1>
+        <button id="menuBtn" class="ghost">CONFIGURACIÓN</button>
+      </header>
+
+      <main class="sensors">
+        <section class="panel sensor-panel" data-sensor="claudia">
+          <div class="heart-glow"></div>
+          <div class="sensor-header">
+            <span class="status-dot"></span>
+            <span class="sensor-name">Claudia</span>
+          </div>
+          <div class="bpm">—</div>
+          <div class="bpm-label">BPM</div>
+          <canvas class="chart"></canvas>
+        </section>
+
+        <section class="panel sensor-panel" data-sensor="cecilia">
+          <div class="heart-glow"></div>
+          <div class="sensor-header">
+            <span class="status-dot"></span>
+            <span class="sensor-name">Cecilia</span>
+          </div>
+          <div class="bpm">—</div>
+          <div class="bpm-label">BPM</div>
+          <canvas class="chart"></canvas>
+        </section>
+      </main>
+
+      <div class="menu-overlay" id="menu" hidden>
+        <div class="menu">
+          <header class="menu-header">
+            <h2>Configuración</h2>
+            <button id="closeMenu" class="ghost">Cerrar</button>
+          </header>
+
+          <div class="config" data-sensor="claudia">
+            <div class="config-row">
+              <span class="config-name">Claudia</span>
+              <span class="conn-state">Desconectado</span>
+            </div>
+            <div class="config-row">
+              <button class="connect">Conectar</button>
+              <button class="disconnect" disabled>Desconectar</button>
+            </div>
+          </div>
+
+          <div class="config" data-sensor="cecilia">
+            <div class="config-row">
+              <span class="config-name">Cecilia</span>
+              <span class="conn-state">Desconectado</span>
+            </div>
+            <div class="config-row">
+              <button class="connect">Conectar</button>
+              <button class="disconnect" disabled>Desconectar</button>
+            </div>
+          </div>
+
+          <div class="config">
+            <div class="config-row">
+              <span class="config-name">Micrófono</span>
+              <span class="conn-state" id="micState">Desactivado</span>
+            </div>
+            <div class="config-row">
+              <button class="connect" id="micToggle">Activar</button>
+            </div>
+            <label class="field">
+              <span>Entrada (dispositivo)</span>
+              <select id="micDevice" disabled>
+                <option>Cargando…</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Volumen de monitor</span>
+              <input id="micVolume" type="range" min="0" max="100" value="70" />
+            </label>
+          </div>
+
+          <div class="config">
+            <div class="config-row">
+              <span class="config-name">Joystick</span>
+              <span class="conn-state" id="jsState">No conectado</span>
+            </div>
+            <div class="config-row">
+              <button class="connect" id="jsRescanBtn">Buscar dispositivos</button>
+            </div>
+            <label class="field">
+              <span>Joystick / Gamepad</span>
+              <select id="jsPadSelect" disabled>
+                <option>Seleccionar…</option>
+              </select>
+            </label>
+            <div class="config-row">
+              <span class="conn-state" id="jsLastEvent">Último: —</span>
+            </div>
+            <div class="legend">
+              <div class="legend-title">Control del modelo 3D</div>
+              <p><span class="key">Stick</span> rotar el modelo</p>
+              <p>
+                <span class="key">X (2)</span> paneo izq ·
+                <span class="key">A (0)</span> paneo der
+              </p>
+              <p>
+                <span class="key">Inicio (9)</span> paneo arriba ·
+                <span class="key">Atrás (8)</span> paneo abajo
+              </p>
+              <p>
+                <span class="key">RT (7)</span> acercar ·
+                <span class="key">LT (6)</span> alejar
+              </p>
+              <p><span class="key">LB (4)</span> reset de todo</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <section class="panel mic-panel">
+      <div class="sensor-header">
+        <span class="status-dot" id="micDot"></span>
+        <span class="sensor-name">Micrófono</span>
+      </div>
+      <canvas class="wave" id="micWave"></canvas>
+    </section>
+
+    <script type="module" src="./index.js"></script>
+  </body>
+</html>
