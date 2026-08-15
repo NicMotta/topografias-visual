@@ -19,6 +19,7 @@ const pages = [
   'midi_test',
   'joystick_test',
   'conferencia_interactiva',
+  'devices-test',
 ]
 
 const input = {}

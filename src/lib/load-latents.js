@@ -31,10 +31,33 @@ export async function fetchLatents() {
   return data;
 }
 
+function imageUrl(file) {
+  return `${import.meta.env.BASE_URL}imagenes_generadas/${file}`;
+}
+
+function imageExists(src) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => resolve(true);
+    img.onerror = () => resolve(false);
+    img.src = src;
+  });
+}
+
 export async function getRandomItem() {
   const data = await fetchLatents();
   const items = data.items || [];
-  return items[Math.floor(Math.random() * items.length)];
+  if (!items.length) return null;
+
+  for (let attempt = 0; attempt < 30; attempt++) {
+    const item = items[Math.floor(Math.random() * items.length)];
+    if (await imageExists(imageUrl(item.file))) return item;
+  }
+
+  for (const item of items) {
+    if (await imageExists(imageUrl(item.file))) return item;
+  }
+  return items[0];
 }
 
 export async function getAllItems() {

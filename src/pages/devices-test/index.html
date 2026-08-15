@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Devices Test</title>
+    <link rel="stylesheet" href="./index.css" />
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <h1>Devices Test</h1>
+        <p class="hint">
+          Debug de conexión WebSocket con los ESP32 y envío de colores desde imagen.
+        </p>
+      </header>
+
+      <div class="grid">
+        <div class="col">
+          <section class="panel">
+            <div class="row">
+              <span class="name">Todos</span>
+              <span class="state" id="allState">Desconectado</span>
+            </div>
+            <div class="row">
+              <button id="connectAll">Conectar todos</button>
+              <button id="disconnectAll" class="ghost" disabled>Desconectar todos</button>
+            </div>
+          </section>
+
+          <section class="panel device" data-device="claudia">
+            <div class="row">
+              <span class="name">Claudia</span>
+              <span class="state">Desconectado</span>
+            </div>
+            <div class="row">
+              <button class="connect">Conectar</button>
+              <button class="disconnect ghost" disabled>Desconectar</button>
+            </div>
+            <label>
+              BPM · <output class="bpm-out">120</output>
+              <input type="range" class="bpm-range" min="40" max="220" value="120" />
+            </label>
+            <div class="row presets">
+              <button data-bpm="60">60</button>
+              <button data-bpm="90">90</button>
+              <button data-bpm="120">120</button>
+              <button data-bpm="150">150</button>
+              <button data-bpm="180">180</button>
+            </div>
+            <label>
+              Brillo · <output class="bright-out">128</output>
+              <input type="range" class="bright-range" min="0" max="255" value="128" />
+            </label>
+            <div class="row">
+              <button class="panic">Pánico ON</button>
+            </div>
+          </section>
+
+          <section class="panel device" data-device="cecilia">
+            <div class="row">
+              <span class="name">Cecilia</span>
+              <span class="state">Desconectado</span>
+            </div>
+            <div class="row">
+              <button class="connect">Conectar</button>
+              <button class="disconnect ghost" disabled>Desconectar</button>
+            </div>
+            <label>
+              BPM · <output class="bpm-out">120</output>
+              <input type="range" class="bpm-range" min="40" max="220" value="120" />
+            </label>
+            <div class="row presets">
+              <button data-bpm="60">60</button>
+              <button data-bpm="90">90</button>
+              <button data-bpm="120">120</button>
+              <button data-bpm="150">150</button>
+              <button data-bpm="180">180</button>
+            </div>
+            <label>
+              Brillo · <output class="bright-out">128</output>
+              <input type="range" class="bright-range" min="0" max="255" value="128" />
+            </label>
+            <div class="row">
+              <button class="panic">Pánico ON</button>
+            </div>
+          </section>
+
+          <section class="panel device" data-device="nic">
+            <div class="row">
+              <span class="name">Nic</span>
+              <span class="state">Desconectado</span>
+            </div>
+            <div class="row">
+              <button class="connect">Conectar</button>
+              <button class="disconnect ghost" disabled>Desconectar</button>
+            </div>
+            <label>
+              BPM · <output class="bpm-out">120</output>
+              <input type="range" class="bpm-range" min="40" max="220" value="120" />
+            </label>
+            <div class="row presets">
+              <button data-bpm="60">60</button>
+              <button data-bpm="90">90</button>
+              <button data-bpm="120">120</button>
+              <button data-bpm="150">150</button>
+              <button data-bpm="180">180</button>
+            </div>
+            <label>
+              Brillo · <output class="bright-out">128</output>
+              <input type="range" class="bright-range" min="0" max="255" value="128" />
+            </label>
+            <div class="row">
+              <button class="panic">Pánico ON</button>
+            </div>
+          </section>
+        </div>
+
+        <div class="col">
+          <section class="panel image-panel">
+            <div class="row">
+              <span class="name">Imagen → colores</span>
+            </div>
+            <button id="randomBtn">Elegir imagen aleatoria</button>
+            <img id="preview" alt="Preview de imagen seleccionada" />
+            <div id="meta">Cargando…</div>
+            <div class="swatches" id="swatches"></div>
+          </section>
+
+          <section class="panel log-panel">
+            <div class="row">
+              <span class="name">Log</span>
+              <button id="clearLog" class="ghost">Limpiar</button>
+            </div>
+            <pre id="log"></pre>
+          </section>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="./index.js"></script>
+  </body>
+</html>

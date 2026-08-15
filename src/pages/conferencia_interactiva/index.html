@@ -35,6 +35,65 @@
           <div class="bpm-label">BPM</div>
           <canvas class="chart"></canvas>
         </section>
+
+        <section class="panel dashboard-panel">
+          <div class="dash-header">
+            <span class="status-dot" id="devicesDot"></span>
+            <span class="sensor-name">Dashboard ESP32</span>
+          </div>
+          <div class="dash-colors">
+            <span class="dash-label">Colores</span>
+            <div class="swatches" id="dashColors"></div>
+          </div>
+
+          <div class="dash-device" data-device="claudia">
+            <div class="dash-head">
+              <span class="status-dot"></span>
+              <span class="dash-name">Claudia</span>
+            </div>
+            <div class="dash-row">
+              <span>BPM</span><span class="dash-val dash-bpm">—</span>
+            </div>
+            <div class="dash-row">
+              <span>Brillo</span><span class="dash-val dash-brightness">—</span>
+            </div>
+            <div class="dash-row">
+              <span>Pánico</span><span class="dash-val dash-panic">no</span>
+            </div>
+          </div>
+
+          <div class="dash-device" data-device="cecilia">
+            <div class="dash-head">
+              <span class="status-dot"></span>
+              <span class="dash-name">Cecilia</span>
+            </div>
+            <div class="dash-row">
+              <span>BPM</span><span class="dash-val dash-bpm">—</span>
+            </div>
+            <div class="dash-row">
+              <span>Brillo</span><span class="dash-val dash-brightness">—</span>
+            </div>
+            <div class="dash-row">
+              <span>Pánico</span><span class="dash-val dash-panic">no</span>
+            </div>
+          </div>
+
+          <div class="dash-device" data-device="nic">
+            <div class="dash-head">
+              <span class="status-dot"></span>
+              <span class="dash-name">Nic</span>
+            </div>
+            <div class="dash-row">
+              <span>BPM</span><span class="dash-val dash-bpm">—</span>
+            </div>
+            <div class="dash-row">
+              <span>Brillo</span><span class="dash-val dash-brightness">—</span>
+            </div>
+            <div class="dash-row">
+              <span>Pánico</span><span class="dash-val dash-panic">no</span>
+            </div>
+          </div>
+        </section>
       </main>
 
       <div class="menu-overlay" id="menu" hidden>
@@ -43,7 +102,6 @@
             <h2>Configuración</h2>
             <button id="closeMenu" class="ghost">Cerrar</button>
           </header>
-
           <div class="config" data-sensor="claudia">
             <div class="config-row">
               <span class="config-name">Claudia</span>
@@ -92,7 +150,9 @@
               <span class="conn-state" id="jsState">No conectado</span>
             </div>
             <div class="config-row">
-              <button class="connect" id="jsRescanBtn">Buscar dispositivos</button>
+              <button class="connect" id="jsRescanBtn">
+                Buscar dispositivos
+              </button>
             </div>
             <label class="field">
               <span>Joystick / Gamepad</span>
@@ -121,17 +181,60 @@
               <p><span class="key">LB (4)</span> reset de todo</p>
             </div>
           </div>
+
+          <div class="config">
+            <div class="config-row">
+              <span class="config-name">Dispositivos ESP32</span>
+              <button class="connect" id="devicesConnectAll">
+                Conectar todos
+              </button>
+            </div>
+            <label class="field">
+              <span>Colores</span>
+              <div class="colors-row">
+                <input id="devColor0" type="color" value="#ff0000" />
+                <input id="devColor1" type="color" value="#00ff00" />
+                <input id="devColor2" type="color" value="#0000ff" />
+              </div>
+            </label>
+            <label class="field">
+              <span>Brillo · <output class="brightness-output">0</output></span>
+              <input
+                type="range"
+                class="brightness-range"
+                min="0"
+                max="255"
+                value="128"
+              />
+            </label>
+            <div class="config-row">
+              <button class="connect danger panic-btn">Pánico</button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
 
-    <section class="panel mic-panel">
-      <div class="sensor-header">
-        <span class="status-dot" id="micDot"></span>
-        <span class="sensor-name">Micrófono</span>
-      </div>
-      <canvas class="wave" id="micWave"></canvas>
-    </section>
+    <div class="side-col">
+      <section class="panel hud-panel">
+        <div class="sensor-header">
+          <span class="sensor-name">Imagen</span>
+        </div>
+        <img id="hudPreview" alt="Preview de imagen seleccionada" />
+        <div id="hudMeta">Cargando…</div>
+        <button id="hudRandomBtn">Elegir otra imagen aleatoria</button>
+      </section>
+
+      <section class="panel mic-panel">
+        <div class="sensor-header">
+          <span class="status-dot" id="micDot"></span>
+          <span class="sensor-name">Micrófono</span>
+        </div>
+        <canvas class="wave" id="micWave"></canvas>
+      </section>
+    </div>
+
+    <div class="fade-overlay" id="fadeOverlay"></div>
 
     <script type="module" src="./index.js"></script>
   </body>

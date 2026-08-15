@@ -1,3 +1,5 @@
+import { sendBpm } from "./devices.js";
+
 const WINDOW_MS = 60_000;
 const HEART_RATE_SERVICE = "heart_rate";
 const HEART_RATE_MEASUREMENT = "heart_rate_measurement";
@@ -81,6 +83,7 @@ function onHeartRate(id, event) {
   );
   s.beatAt = now + s.interval;
 
+  sendBpm(id, bpm);
   updateUI(id);
 }
 

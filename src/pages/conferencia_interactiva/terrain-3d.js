@@ -2,10 +2,27 @@ import * as THREE from "three";
 import { createScene, startRenderLoop } from "../../lib/three-setup.js";
 import { getRandomItem } from "../../lib/load-latents.js";
 import { readImagePixels } from "../../lib/read-image-pixels.js";
+import { extractPalette } from "./palette.js";
+import { sendColors } from "./devices.js";
 import { SENSORS } from "./heart-rate.js";
 
 const MIN_BPM = 40;
 const MAX_BPM = 200;
+
+const hudPreview = document.getElementById("hudPreview");
+const hudMeta = document.getElementById("hudMeta");
+const fadeOverlay = document.getElementById("fadeOverlay");
+
+const FADE_MS = 650;
+let fadeTimer = null;
+
+function fade(toBlack) {
+  return new Promise((resolve) => {
+    fadeOverlay.classList.toggle("on", toBlack);
+    clearTimeout(fadeTimer);
+    fadeTimer = setTimeout(resolve, FADE_MS);
+  });
+}
 
 let mesh = null;
 let group = null;
@@ -15,6 +32,10 @@ const clock = new THREE.Clock();
 
 export function getView() {
   return { camera, controls };
+}
+
+export function loadRandomMap() {
+  return buildRandomMap();
 }
 
 export function resetView() {
@@ -100,6 +121,8 @@ function createHeightMeshFromImage(imageData) {
 
 async function buildRandomMap() {
   try {
+    await fade(true);
+
     const item = await getRandomItem();
     if (!item) return;
 
@@ -115,7 +138,26 @@ async function buildRandomMap() {
 
     mesh = newMesh;
     group.add(mesh);
+
+    if (hudPreview) hudPreview.src = imagePath;
+
+    const palette = extractPalette(imageData, 3);
+    sendColors(palette);
+
+    if (hudMeta) {
+      hudMeta.innerHTML = `
+        <strong>${item.file}</strong><br>
+        resolución: ${imageData.width} x ${imageData.height}<br>
+        muestras usadas: ${newMesh.userData.sampleW} x ${newMesh.userData.sampleH}<br>
+        escala altura: ${newMesh.userData.heightScale}<br>
+        coord_1d: ${item.coord_1d != null ? item.coord_1d.toFixed(3) : "-"}<br>
+        colores: ${palette.join(" · ")}
+      `;
+    }
+
+    await fade(false);
   } catch (error) {
+    fade(false);
     console.error("Error al generar el mapa 3D:", error);
   }
 }
@@ -155,6 +197,10 @@ export function initTerrain() {
   renderer.domElement.style.position = "fixed";
   renderer.domElement.style.inset = "0";
   renderer.domElement.style.zIndex = "0";
+
+  document.getElementById("hudRandomBtn")?.addEventListener("click", () => {
+    loadRandomMap();
+  });
 
   startRenderLoop(renderer, scene, camera, controls, beforeRender);
   buildRandomMap();

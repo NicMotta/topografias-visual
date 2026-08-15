@@ -1,0 +1,44 @@
+<!doctype html>
+<html>
+  <body>
+    <div id="out">waiting</div>
+    <script type="module">
+      import { readImagePixels } from "./src/lib/read-image-pixels.js";
+      import { getRandomItem } from "./src/lib/load-latents.js";
+
+      const out = document.getElementById("out");
+      const r = {};
+
+      try {
+        const item = await getRandomItem();
+        r.item = item ? item.file : "null";
+      } catch (e) {
+        r.getItemErr = String(e);
+      }
+
+      try {
+        const p = `${import.meta.env.BASE_URL}imagenes_generadas/imagen_0000.png`;
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        await new Promise((res, rej) => {
+          img.onload = res;
+          img.onerror = () => rej(new Error("img onerror"));
+          img.src = p;
+        });
+        r.plainImg = "ok";
+      } catch (e) {
+        r.plainImgErr = String(e);
+      }
+
+      try {
+        const p = `${import.meta.env.BASE_URL}imagenes_generadas/imagen_0000.png`;
+        const d = await readImagePixels(p);
+        r.pixels = `${d.width}x${d.height}`;
+      } catch (e) {
+        r.pixelsErr = String(e);
+      }
+
+      out.textContent = JSON.stringify(r, null, 2);
+    </script>
+  </body>
+</html>
