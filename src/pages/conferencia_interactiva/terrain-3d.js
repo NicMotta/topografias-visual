@@ -4,14 +4,36 @@ import { getRandomItem } from "../../lib/load-latents.js";
 import { readImagePixels } from "../../lib/read-image-pixels.js";
 import { extractPalette } from "./palette.js";
 import { sendColors } from "./devices.js";
-import { SENSORS } from "./heart-rate.js";
+import { SENSORS, isSynced } from "./heart-rate.js";
 
 const MIN_BPM = 40;
 const MAX_BPM = 200;
+const BASE_BPM = 85;
+const NORMAL_BG = new THREE.Color(0x0e0e0e);
+const SYNC_BG = new THREE.Color(0xf2f2f2);
 
 const hudPreview = document.getElementById("hudPreview");
 const hudMeta = document.getElementById("hudMeta");
 const fadeOverlay = document.getElementById("fadeOverlay");
+
+let heightFactor = 1;
+let xrayMode = false;
+
+function beatPulse(timeSec) {
+  const period = 60 / BASE_BPM;
+  const phase = (timeSec % period) / period;
+  return Math.pow(1 - phase, 3);
+}
+
+export function setTerrainHeight(factor) {
+  heightFactor = factor;
+  if (mesh) mesh.scale.y = factor;
+}
+
+export function setTerrainMode(mode) {
+  xrayMode = mode === "xray";
+  if (mesh) mesh.material.wireframe = xrayMode;
+}
 
 const FADE_MS = 650;
 let fadeTimer = null;
@@ -28,6 +50,7 @@ let mesh = null;
 let group = null;
 let camera = null;
 let controls = null;
+let scene = null;
 const clock = new THREE.Clock();
 
 export function getView() {
@@ -40,11 +63,14 @@ export function loadRandomMap() {
 
 export function resetView() {
   if (camera && controls) {
-    camera.position.set(0, 110, 180);
+    camera.position.set(0, 75, 125);
     controls.target.set(0, 0, 0);
     camera.lookAt(controls.target);
   }
-  if (mesh) mesh.material.wireframe = false;
+  if (mesh) {
+    mesh.material.wireframe = xrayMode;
+    mesh.scale.y = heightFactor;
+  }
   if (group) {
     group.position.set(0, 0, 0);
     group.rotation.set(0, 0, 0);
@@ -137,6 +163,8 @@ async function buildRandomMap() {
     }
 
     mesh = newMesh;
+    mesh.scale.y = heightFactor;
+    mesh.material.wireframe = xrayMode;
     group.add(mesh);
 
     if (hudPreview) hudPreview.src = imagePath;
@@ -169,18 +197,32 @@ function beforeRender() {
   const claudia = normalize(SENSORS.claudia.lastBpm);
   const cecilia = normalize(SENSORS.cecilia.lastBpm);
 
-  const targetScale = 0.7 + cecilia * 1.3;
+  const pulse = beatPulse(clock.elapsedTime);
+  const targetScale = 0.7 + cecilia * 1.3 + pulse * 0.07;
   group.scale.y += (targetScale - group.scale.y) * 0.08;
+  group.rotation.z =
+    Math.sin(clock.elapsedTime * (BASE_BPM / 60) * Math.PI * 2) *
+    0.004 *
+    pulse;
+
+  if (scene) {
+    scene.background.lerp(isSynced() ? SYNC_BG : NORMAL_BG, 0.05);
+  }
 }
 
 export function initTerrain() {
+  const terrainModal = document.getElementById("terrainModal");
+  const terrainViewport = document.getElementById("terrainViewport");
+
   const created = createScene({
-    cameraPos: [0, 110, 180],
+    cameraPos: [0, 75, 125],
     background: 0x0e0e0e,
     far: 5000,
     controlsTarget: [0, 0, 0],
+    container: terrainViewport,
   });
-  const { scene, renderer } = created;
+  const { scene: createdScene, renderer } = created;
+  scene = createdScene;
   camera = created.camera;
   controls = created.controls;
 
@@ -194,14 +236,43 @@ export function initTerrain() {
   group.scale.y = 0.7;
   scene.add(group);
 
-  renderer.domElement.style.position = "fixed";
-  renderer.domElement.style.inset = "0";
-  renderer.domElement.style.zIndex = "0";
+  renderer.domElement.style.display = "block";
 
   document.getElementById("hudRandomBtn")?.addEventListener("click", () => {
     loadRandomMap();
   });
 
-  startRenderLoop(renderer, scene, camera, controls, beforeRender);
+  document
+    .getElementById("terrainRandomBtn")
+    ?.addEventListener("click", () => {
+      loadRandomMap();
+    });
+
+  const heightRange = document.getElementById("terrainHeightRange");
+  heightRange?.addEventListener("input", () => {
+    setTerrainHeight(Number(heightRange.value) / 100);
+  });
+
+  const colorBtn = document.getElementById("terrainColorBtn");
+  const xrayBtn = document.getElementById("terrainXrayBtn");
+  colorBtn?.addEventListener("click", () => {
+    setTerrainMode("color");
+    colorBtn.classList.add("seg-active");
+    xrayBtn?.classList.remove("seg-active");
+  });
+  xrayBtn?.addEventListener("click", () => {
+    setTerrainMode("xray");
+    xrayBtn.classList.add("seg-active");
+    colorBtn?.classList.remove("seg-active");
+  });
+
+  startRenderLoop(
+    renderer,
+    scene,
+    camera,
+    controls,
+    beforeRender,
+    () => !terrainModal.hidden,
+  );
   buildRandomMap();
 }

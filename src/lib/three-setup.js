@@ -12,6 +12,7 @@ export function createScene(options = {}) {
     far = 5000,
     controlsTarget = [0, 0, 0],
     pixelRatio = true,
+    container = null,
   } = options
 
   const scene = new THREE.Scene()
@@ -21,9 +22,18 @@ export function createScene(options = {}) {
   camera.position.set(...cameraPos)
 
   const renderer = new THREE.WebGLRenderer({ antialias: true })
-  renderer.setSize(window.innerWidth, window.innerHeight)
   if (pixelRatio) renderer.setPixelRatio(window.devicePixelRatio)
-  document.body.appendChild(renderer.domElement)
+  ;(container || document.body).appendChild(renderer.domElement)
+
+  function applySize() {
+    const width = container ? container.clientWidth : window.innerWidth
+    const height = container ? container.clientHeight : window.innerHeight
+    if (!width || !height) return
+    camera.aspect = width / height
+    camera.updateProjectionMatrix()
+    renderer.setSize(width, height)
+  }
+  applySize()
 
   const controls = new OrbitControls(camera, renderer.domElement)
   controls.enableDamping = true
@@ -32,18 +42,18 @@ export function createScene(options = {}) {
   const raycaster = new THREE.Raycaster()
   const pointer = new THREE.Vector2()
 
-  window.addEventListener('resize', () => {
-    camera.aspect = window.innerWidth / window.innerHeight
-    camera.updateProjectionMatrix()
-    renderer.setSize(window.innerWidth, window.innerHeight)
-  })
+  window.addEventListener('resize', applySize)
+  if (container && typeof ResizeObserver !== 'undefined') {
+    new ResizeObserver(applySize).observe(container)
+  }
 
   return { scene, camera, renderer, controls, raycaster, pointer }
 }
 
-export function startRenderLoop(renderer, scene, camera, controls, beforeRender) {
+export function startRenderLoop(renderer, scene, camera, controls, beforeRender, isVisible) {
   function animate() {
     requestAnimationFrame(animate)
+    if (isVisible && !isVisible()) return
     if (beforeRender) beforeRender()
     controls.update()
     renderer.render(scene, camera)

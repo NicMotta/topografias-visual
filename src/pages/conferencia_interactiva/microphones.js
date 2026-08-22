@@ -61,6 +61,9 @@ function buildGraph() {
   gainNode = audioCtx.createGain();
   gainNode.gain.value = volumeInput.value / 100;
   gainNode.connect(audioCtx.destination);
+
+  // Monitor directo: mic -> volumen -> salida, sin delay ni eco
+  source.connect(gainNode);
 }
 
 function drawWave() {

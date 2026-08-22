@@ -1,6 +1,8 @@
 const $ = (id) => document.getElementById(id.replace("#", ""));
 
 const DEFAULT_COLORS = ["#ff0000", "#00ff00", "#0000ff"];
+const SYNC_COLOR = "#f5f5f5";
+let lastPalette = [...DEFAULT_COLORS];
 
 function makeDevice(id, label, url) {
   return {
@@ -124,10 +126,19 @@ export function disconnectAll() {
   for (const id of Object.keys(DEVICES)) disconnectDevice(id);
 }
 
-export function sendColors(colors) {
+function pushColors(colors) {
   for (const d of Object.values(DEVICES)) d.state.colors = colors;
   broadcast({ type: "colors", colors });
   emitUpdate();
+}
+
+export function sendColors(colors) {
+  lastPalette = [...colors];
+  pushColors(colors);
+}
+
+export function setSyncColors(synced) {
+  pushColors(synced ? new Array(3).fill(SYNC_COLOR) : lastPalette);
 }
 
 export function sendBpm(device, bpm) {

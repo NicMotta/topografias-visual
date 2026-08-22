@@ -1,6 +1,8 @@
-import { sendBpm } from "./devices.js";
+import { sendBpm, setSyncColors } from "./devices.js";
 
 const WINDOW_MS = 60_000;
+const SYNC_ENTER_MS = 1200;
+const SYNC_EXIT_MS = 2000;
 const HEART_RATE_SERVICE = "heart_rate";
 const HEART_RATE_MEASUREMENT = "heart_rate_measurement";
 const BATTERY_SERVICE = "battery_service";
@@ -29,6 +31,86 @@ export const SENSORS = {
 
 const panel = (id) => document.querySelector(`.sensor-panel[data-sensor="${id}"]`);
 const config = (id) => document.querySelector(`.config[data-sensor="${id}"]`);
+
+let synced = false;
+let matchAt = null;
+let mismatchAt = null;
+let emulatedSync = null;
+
+export function isSynced() {
+  return synced;
+}
+
+export function toggleEmulatedSync() {
+  emulatedSync = emulatedSync === null ? !synced : null;
+  console.log(
+    emulatedSync === null
+      ? "[sync] emulación desactivada"
+      : `[sync] emulación activada (${emulatedSync ? "SÍ" : "no"})`,
+  );
+  evaluateSync(performance.now());
+}
+
+function bpmMatched() {
+  const values = Object.values(SENSORS)
+    .filter((s) => s.connected && s.lastBpm != null && s.lastBpm > 0)
+    .map((s) => s.lastBpm);
+  return values.length > 1 && new Set(values).size === 1;
+}
+
+function evaluateSync(now) {
+  if (emulatedSync !== null) {
+    setSynced(emulatedSync);
+    return;
+  }
+  const matched = bpmMatched();
+  if (!synced) {
+    if (matched) {
+      matchAt = matchAt ?? now;
+      if (now - matchAt >= SYNC_ENTER_MS) setSynced(true);
+    } else {
+      matchAt = null;
+    }
+  } else if (!matched) {
+    mismatchAt = mismatchAt ?? now;
+    if (now - mismatchAt >= SYNC_EXIT_MS) setSynced(false);
+  } else {
+    mismatchAt = null;
+  }
+}
+
+function positionSyncBeam() {
+  const line = document.getElementById("syncBeamPath");
+  const badge = document.getElementById("syncBadge");
+  const a = panel("claudia");
+  const b = panel("cecilia");
+  if (!line || !a || !b) return;
+  const ra = a.getBoundingClientRect();
+  const rb = b.getBoundingClientRect();
+  const x1 = ra.left + ra.width / 2;
+  const y1 = ra.top + ra.height / 2;
+  const x2 = rb.left + rb.width / 2;
+  const y2 = rb.top + rb.height / 2;
+  line.setAttribute("d", `M${x1} ${y1} L${x2} ${y2}`);
+  if (badge) {
+    badge.style.setProperty("--bx", `${(x1 + x2) / 2}px`);
+    badge.style.setProperty("--by", `${(y1 + y2) / 2}px`);
+  }
+}
+
+function setSynced(value) {
+  if (synced === value) return;
+  synced = value;
+  matchAt = null;
+  mismatchAt = null;
+  document.body.classList.toggle("sync", value);
+  setSyncColors(value);
+  positionSyncBeam();
+  const beam = document.getElementById("syncBeam");
+  if (beam) beam.classList.toggle("active", value);
+  const badge = document.getElementById("syncBadge");
+  if (badge) badge.hidden = !value;
+}
 
 export function isBluetoothAvailable() {
   return "bluetooth" in navigator;
@@ -85,6 +167,7 @@ function onHeartRate(id, event) {
 
   sendBpm(id, bpm);
   updateUI(id);
+  evaluateSync(now);
 }
 
 function onDisconnected(id) {
@@ -97,6 +180,7 @@ function onDisconnected(id) {
   s.history = [];
   s.beatAt = 0;
   updateUI(id);
+  evaluateSync(performance.now());
 }
 
 export function disconnectSensor(id) {
@@ -270,9 +354,18 @@ export function initHeartRate() {
     drawChart(id);
   }
 
-  window.addEventListener("resize", () => {
-    for (const id of Object.keys(SENSORS)) drawChart(id);
+  window.addEventListener("keydown", (event) => {
+    if (event.repeat) return;
+    if (event.key.toLowerCase() !== "p") return;
+    if (event.target.matches("input, select, textarea")) return;
+    toggleEmulatedSync();
   });
 
+  window.addEventListener("resize", () => {
+    for (const id of Object.keys(SENSORS)) drawChart(id);
+    positionSyncBeam();
+  });
+
+  positionSyncBeam();
   requestAnimationFrame(pulse);
 }

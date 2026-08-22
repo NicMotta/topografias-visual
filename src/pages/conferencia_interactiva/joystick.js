@@ -19,7 +19,18 @@ const PAN_RIGHT_BTN = 0;
 const PAN_UP_BTN = 9;
 const PAN_DOWN_BTN = 8;
 
-const ROTATE_SPEED = 0.012;
+// PALANCA
+const STICK_LEFT_RIGHT = 0;
+const STICK_UP_DOWN = 1;
+const BUTTON_BACK = 0;
+const BUTTON_YELLOW = 1;
+const BUTTON_RIGHT = 2;
+const BUTTON_FRONT = 3;
+const MINI_STICK = 9;
+const DIMMER_UP = 2;
+const DIMMER_DOWN = 3;
+
+const ROTATE_SPEED = 0.02;
 const ZOOM_STEP = 1.03;
 const AXIS_DEADZONE = 0.06;
 
@@ -43,12 +54,32 @@ const STANDARD_BUTTONS = [
   "Home",
 ];
 
+const STANDARD_AXES = [
+  "Stick Izq X",
+  "Stick Izq Y",
+  "Stick Der X",
+  "Stick Der Y",
+];
+
 let selectedIndex = null;
 const lastButtons = {};
+const lastAxes = {};
 
 function getGamepads() {
   if (!navigator.getGamepads) return [];
   return [...navigator.getGamepads()].filter(Boolean);
+}
+
+function logPadInfo(pad) {
+  console.log(
+    `[joystick] ${pad.id} · mapping="${pad.mapping}" · botones=${pad.buttons.length} · ejes=${pad.axes.length}`,
+  );
+}
+
+function buttonName(pad, i) {
+  return pad.mapping === "standard" && STANDARD_BUTTONS[i] != null
+    ? STANDARD_BUTTONS[i]
+    : String(i);
 }
 
 function shortName(pad) {
@@ -156,18 +187,44 @@ function poll() {
     if (net > 0.05) zoomCamera(1 / Math.pow(ZOOM_STEP, net));
     else if (net < -0.05) zoomCamera(Math.pow(ZOOM_STEP, -net));
 
-    pad.buttons.forEach((btn, i) => {
-      const wasPressed = Boolean(lastButtons[i]);
-      if (btn.pressed && !wasPressed) {
-        if (i === RESET_BTN) resetView();
-        const name =
-          pad.mapping === "standard" && STANDARD_BUTTONS[i] != null
-            ? STANDARD_BUTTONS[i]
-            : String(i);
-        lastEventEl.textContent = `Último: Botón ${name}`;
+    for (let i = 0; i < pad.buttons.length; i++) {
+      const btn = pad.buttons[i];
+      if (!btn) continue;
+      const prevVal = lastButtons[i] ?? 0;
+      const value = btn.value ?? 0;
+      const pressed = Boolean(btn.pressed);
+      if (pressed !== Boolean(prevVal) || Math.abs(value - prevVal) > 0.05) {
+        const name = buttonName(pad, i);
+        if (pressed) {
+          if (i === RESET_BTN) resetView();
+          console.log(
+            `[joystick] botón ${i} (${name}) presionado · value=${value.toFixed(2)}`,
+          );
+          lastEventEl.textContent = `Último: Botón ${name}`;
+        } else if (Math.abs(value - prevVal) > 0.05) {
+          console.log(
+            `[joystick] botón ${i} (${name}) analógico · value=${value.toFixed(2)}`,
+          );
+        } else {
+          console.log(`[joystick] botón ${i} (${name}) soltado`);
+        }
       }
-      lastButtons[i] = btn.pressed;
-    });
+      lastButtons[i] = value;
+    }
+
+    for (let i = 0; i < pad.axes.length; i++) {
+      const value = pad.axes[i] ?? 0;
+      const prev = lastAxes[i] ?? 0;
+      if (Math.abs(value - prev) > 0.05) {
+        const name =
+          pad.mapping === "standard" && STANDARD_AXES[i] != null
+            ? STANDARD_AXES[i]
+            : String(i);
+        console.log(`[joystick] eje ${i} (${name}) = ${value.toFixed(2)}`);
+        lastEventEl.textContent = `Último: Eje ${name}`;
+        lastAxes[i] = value;
+      }
+    }
   }
 
   requestAnimationFrame(poll);
@@ -177,6 +234,9 @@ export function initJoystick() {
   padSelect.addEventListener("change", () => {
     selectedIndex = padSelect.value === "" ? null : Number(padSelect.value);
     for (const k of Object.keys(lastButtons)) delete lastButtons[k];
+    for (const k of Object.keys(lastAxes)) delete lastAxes[k];
+    const pad = getGamepads().find((p) => p.index === selectedIndex);
+    if (pad) logPadInfo(pad);
     updateState(getGamepads().length);
   });
 
@@ -187,6 +247,8 @@ export function initJoystick() {
 
   window.addEventListener("gamepadconnected", populate);
   window.addEventListener("gamepaddisconnected", populate);
+
+  for (const pad of getGamepads()) logPadInfo(pad);
 
   populate();
   requestAnimationFrame(poll);

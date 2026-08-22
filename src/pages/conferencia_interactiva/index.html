@@ -3,6 +3,11 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      html {
+        background: #0a0a0b;
+      }
+    </style>
     <title>Conferencia Interactiva · BPM</title>
     <link rel="stylesheet" href="./index.css" />
   </head>
@@ -10,7 +15,10 @@
     <div id="app">
       <header>
         <h1>Conferencia Interactiva</h1>
-        <button id="menuBtn" class="ghost">CONFIGURACIÓN</button>
+        <nav class="header-actions">
+          <button id="menuBtn" class="ghost">CONFIGURACIÓN</button>
+          <button id="creditsBtn" class="ghost">OPERADORES</button>
+        </nav>
       </header>
 
       <main class="sensors">
@@ -39,7 +47,7 @@
         <section class="panel dashboard-panel">
           <div class="dash-header">
             <span class="status-dot" id="devicesDot"></span>
-            <span class="sensor-name">Dashboard ESP32</span>
+            <span class="sensor-name">Pulso Cardíaco</span>
           </div>
           <div class="dash-colors">
             <span class="dash-label">Colores</span>
@@ -122,6 +130,26 @@
               <button class="connect">Conectar</button>
               <button class="disconnect" disabled>Desconectar</button>
             </div>
+          </div>
+
+          <div class="config">
+            <div class="config-row">
+              <span class="config-name">Escuchar latido</span>
+              <span class="conn-state" id="heartbeatState">Desactivado</span>
+            </div>
+            <div class="config-row">
+              <button class="connect" id="heartbeatToggle">Activar</button>
+            </div>
+            <label class="field">
+              <span>Volumen · <output id="heartbeatVolumeOut">40</output></span>
+              <input
+                id="heartbeatVolume"
+                type="range"
+                min="0"
+                max="100"
+                value="40"
+              />
+            </label>
           </div>
 
           <div class="config">
@@ -215,6 +243,14 @@
       </div>
     </div>
 
+    <nav class="side-nav">
+      <button id="catalogoBtn" class="ghost">MUESTRAS</button>
+      <button id="terrainBtn" class="ghost">ANÁLISIS</button>
+      <button id="capasBtn" class="ghost">CAPAS</button>
+      <button id="extra3Btn" class="ghost">LATENTE</button>
+      <button id="extraBtn" class="ghost">VIBRÁTIL</button>
+    </nav>
+
     <div class="side-col">
       <section class="panel hud-panel">
         <div class="sensor-header">
@@ -222,7 +258,7 @@
         </div>
         <img id="hudPreview" alt="Preview de imagen seleccionada" />
         <div id="hudMeta">Cargando…</div>
-        <button id="hudRandomBtn">Elegir otra imagen aleatoria</button>
+        <button id="hudRandomBtn">Elegir otra imagen</button>
       </section>
 
       <section class="panel mic-panel">
@@ -233,6 +269,195 @@
         <canvas class="wave" id="micWave"></canvas>
       </section>
     </div>
+
+    <div class="credits-overlay" id="credits" hidden>
+      <div class="credits">
+        <button id="closeCredits" class="ghost credits-close">Cerrar</button>
+
+        <h2 class="credits-title">Conferencia Interactiva</h2>
+        <p class="credits-sub">Operadores</p>
+
+        <ul class="credits-list">
+          <li>
+            <span class="credits-name">Claudia Valente</span>
+            <!-- <span class="credits-role">acá va una descripción / rol</span> -->
+          </li>
+          <li>
+            <span class="credits-name">Cecilia Vazquez</span>
+            <!-- <span class="credits-role">acá va una descripción / rol</span> -->
+          </li>
+          <li>
+            <span class="credits-name">Nic Motta</span>
+            <!-- <span class="credits-role">acá va una descripción / rol</span> -->
+          </li>
+        </ul>
+
+        <div class="credits-meta">
+          <span>Año: 2026</span>
+          <span>Lugar: Buenos Aires, Argentina</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="menu-overlay" id="terrainModal" hidden>
+      <div class="terrain-modal">
+        <header class="menu-header">
+          <h2>Análisis</h2>
+          <div class="modal-actions">
+            <button id="terrainRandomBtn" class="ghost">Otra imagen</button>
+            <button id="closeTerrain" class="ghost">Cerrar</button>
+          </div>
+        </header>
+        <div class="viz-toolbar">
+          <label class="toolbar-field">
+            <span>Altura</span>
+            <input
+              id="terrainHeightRange"
+              type="range"
+              min="20"
+              max="250"
+              value="100"
+            />
+          </label>
+          <div class="segmented">
+            <button id="terrainColorBtn" class="ghost seg-active">Color</button>
+            <button id="terrainXrayBtn" class="ghost">X-Ray</button>
+          </div>
+        </div>
+        <div class="terrain-viewport" id="terrainViewport"></div>
+      </div>
+    </div>
+
+    <div class="menu-overlay" id="catalogoModal" hidden>
+      <div class="catalogo-modal">
+        <header class="menu-header">
+          <h2>Muestras</h2>
+          <button id="closeCatalogo" class="ghost">Cerrar</button>
+        </header>
+
+        <section class="cat-section">
+          <div class="config-row">
+            <strong>Timeline por coord_1d</strong>
+            <div class="modal-actions">
+              <button id="catPrevBtn" class="ghost">Anterior</button>
+              <button id="catNextBtn" class="ghost">Siguiente</button>
+              <button id="catRandomBtn" class="ghost">Aleatorio</button>
+            </div>
+          </div>
+          <input id="catIndexSlider" type="range" min="0" max="0" value="0" />
+        </section>
+
+        <section class="cat-main-row">
+          <img id="catMainImg" alt="imagen seleccionada" />
+          <div class="cat-spark-wrap">
+            <canvas id="catSpark" width="740" height="120"></canvas>
+            <div class="hint" id="catSparkMeta"></div>
+            <div id="catMainMeta">Cargando…</div>
+          </div>
+        </section>
+
+        <section class="cat-section">
+          <strong>Vecinos más cercanos en coord_3d</strong>
+          <div class="hint" id="catNeighborsMeta">Calculando…</div>
+          <div id="catNeighbors" class="cat-neighbors"></div>
+        </section>
+      </div>
+    </div>
+
+    <div class="menu-overlay" id="capasModal" hidden>
+      <div class="terrain-modal">
+        <header class="menu-header">
+          <h2>Capas</h2>
+          <div class="modal-actions">
+            <button id="capasReloadBtn" class="ghost">Otras imágenes</button>
+            <button id="closeCapas" class="ghost">Cerrar</button>
+          </div>
+        </header>
+        <div class="viz-toolbar">
+          <label class="toolbar-field">
+            <span>Grosor · <output id="capasThicknessOut">13</output></span>
+            <input id="capasThickness" type="range" min="4" max="40" value="13" />
+          </label>
+          <label class="toolbar-field">
+            <span>Distancia · <output id="capasStrideOut">58</output></span>
+            <input id="capasStride" type="range" min="5" max="110" value="58" />
+          </label>
+        </div>
+        <div class="layer-toggles">
+          <div class="segmented" id="capasLayerToggles"></div>
+        </div>
+        <div class="terrain-viewport" id="capasViewport">
+          <div class="viewport-loading" id="capasLoading">Cargando capas…</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="menu-overlay" id="extra3Modal" hidden>
+      <div class="terrain-modal">
+        <header class="menu-header">
+          <h2>Latente</h2>
+          <button id="closeExtra3" class="ghost">Cerrar</button>
+        </header>
+        <div class="viz-body">
+          <div class="terrain-viewport" id="extra3Viewport"></div>
+          <aside class="viz-side">
+            <img id="extra3Preview" alt="Preview de imagen seleccionada" />
+            <div id="extra3Meta">Selecciona una imagen</div>
+            <p class="hint">
+              Arrastrar: orbitar · Rueda: zoom · Click en un punto: ver imagen
+            </p>
+          </aside>
+        </div>
+      </div>
+    </div>
+
+    <div class="menu-overlay" id="extraModal" hidden>
+      <div class="terrain-modal">
+        <header class="menu-header">
+          <h2>Vibrátil</h2>
+          <div class="modal-actions">
+            <button id="extraRandomBtn" class="ghost">Otra imagen</button>
+            <button id="closeExtra" class="ghost">Cerrar</button>
+          </div>
+        </header>
+        <div class="viz-toolbar">
+          <label class="toolbar-field">
+            <span>Altura</span>
+            <input
+              id="flowHeightRange"
+              type="range"
+              min="20"
+              max="250"
+              value="100"
+            />
+          </label>
+          <label class="toolbar-field">
+            <span>Tamaño de puntos</span>
+            <input
+              id="flowPointSize"
+              type="range"
+              min="0.4"
+              max="4"
+              step="0.05"
+              value="1.15"
+            />
+          </label>
+        </div>
+        <div class="terrain-viewport" id="extraViewport"></div>
+      </div>
+    </div>
+
+    <svg class="sync-beam" id="syncBeam" aria-hidden="true">
+      <path id="syncBeamPath" class="sync-beam-line" d="M0 0 L1 1" />
+      <circle class="sync-beam-pulse" r="5">
+        <animateMotion dur="1.2s" repeatCount="indefinite">
+          <mpath href="#syncBeamPath" />
+        </animateMotion>
+      </circle>
+    </svg>
+    <div class="sync-badge" id="syncBadge" hidden>Sincronizados</div>
+
+    <div class="waiting-msg" id="waitingMsg">Esperando muestras</div>
 
     <div class="fade-overlay" id="fadeOverlay"></div>
 
